@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Date;
 
 /**
@@ -33,7 +35,19 @@ public class JwtTokenProvider {
 
     @PostConstruct
     protected void init() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        byte[] keyBytes;
+        try {
+            // Base64로 인코딩된 키인 경우
+            keyBytes = Decoders.BASE64.decode(secretKey);
+        } catch (IllegalArgumentException e) {
+            // 일반 문자열인 경우 - 최소 256비트(32바이트) 이상 필요
+            log.warn("JWT secret is not Base64 encoded. Using raw string with padding if needed.");
+            String paddedKey = secretKey;
+            while (paddedKey.getBytes(StandardCharsets.UTF_8).length < 32) {
+                paddedKey += secretKey;
+            }
+            keyBytes = paddedKey.getBytes(StandardCharsets.UTF_8);
+        }
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 

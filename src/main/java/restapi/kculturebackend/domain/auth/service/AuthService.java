@@ -16,6 +16,8 @@ import restapi.kculturebackend.domain.auth.dto.*;
 import restapi.kculturebackend.domain.auth.entity.RefreshToken;
 import restapi.kculturebackend.domain.auth.repository.RefreshTokenRepository;
 import restapi.kculturebackend.domain.user.entity.User;
+import restapi.kculturebackend.domain.user.entity.UserProfile;
+import restapi.kculturebackend.domain.user.repository.UserProfileRepository;
 import restapi.kculturebackend.domain.user.repository.UserRepository;
 import restapi.kculturebackend.security.jwt.JwtTokenProvider;
 
@@ -28,6 +30,7 @@ import restapi.kculturebackend.security.jwt.JwtTokenProvider;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -94,6 +97,11 @@ public class AuthService {
                 .build();
 
         User savedUser = userRepository.save(user);
+        
+        // UserProfile 자동 생성
+        UserProfile profile = UserProfile.createDefault(savedUser);
+        userProfileRepository.save(profile);
+        
         log.info("New user registered: {} ({})", savedUser.getEmail(), savedUser.getType());
 
         return SignupResponse.builder()
@@ -180,18 +188,9 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("사용자"));
 
-        // 비밀번호 변경 (User 엔티티에 메서드 추가 필요)
-        User updatedUser = User.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .name(user.getName())
-                .type(user.getType())
-                .profileImage(user.getProfileImage())
-                .isActive(user.getIsActive())
-                .build();
-
-        userRepository.save(updatedUser);
+        // 비밀번호 변경
+        user.updatePassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
         log.info("Password reset for user: {}", email);
     }
 

@@ -8,8 +8,11 @@ public class NotFoundException extends BusinessException {
         super("NOT_FOUND", message);
     }
 
-    public NotFoundException(String resource) {
-        super("NOT_FOUND", resource + "을(를) 찾을 수 없습니다.");
+    /**
+     * 리소스 타입을 기반으로 메시지 생성
+     */
+    public static NotFoundException forResource(String resource) {
+        return new NotFoundException(resource + "을(를) 찾을 수 없습니다.");
     }
 }
 

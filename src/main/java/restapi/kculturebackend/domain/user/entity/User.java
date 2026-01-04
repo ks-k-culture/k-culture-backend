@@ -86,6 +86,10 @@ public class User extends BaseEntity implements UserDetails {
         this.profileImage = profileImage;
     }
 
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
     public void deactivate() {
         this.isActive = false;
     }

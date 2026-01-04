@@ -3,6 +3,7 @@ package restapi.kculturebackend.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -18,6 +19,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import restapi.kculturebackend.security.UserDetailsServiceImpl;
+import restapi.kculturebackend.security.jwt.JwtAccessDeniedHandler;
+import restapi.kculturebackend.security.jwt.JwtAuthenticationEntryPoint;
 import restapi.kculturebackend.security.jwt.JwtAuthenticationFilter;
 
 import java.util.List;
@@ -28,6 +31,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final UserDetailsServiceImpl userDetailsService;
 
     @Bean
@@ -37,6 +42,10 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler)
             )
             .authorizeHttpRequests(auth -> auth
                 // Swagger/OpenAPI 문서 접근 허용
@@ -53,12 +62,15 @@ public class SecurityConfig {
                 ).permitAll()
                 // 인증/회원가입 엔드포인트 허용
                 .requestMatchers("/api/auth/**").permitAll()
-                // 배우 목록/상세 조회는 인증 없이 허용 (추천은 인증 필요)
-                .requestMatchers("/api/actors", "/api/actors/*").permitAll()
-                // 작품구인 목록/상세 조회는 인증 없이 허용
-                .requestMatchers("/api/jobs", "/api/jobs/*").permitAll()
-                // 공지사항 조회는 인증 없이 허용
-                .requestMatchers("/api/notices", "/api/notices/*").permitAll()
+                // 배우 목록/상세 조회는 GET만 인증 없이 허용
+                .requestMatchers(HttpMethod.GET, "/api/actors", "/api/actors/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/actors/*/filmography").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/actors/*/showreels").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/actors/*/portfolio").permitAll()
+                // 작품구인 목록/상세 조회는 GET만 인증 없이 허용
+                .requestMatchers(HttpMethod.GET, "/api/jobs", "/api/jobs/*").permitAll()
+                // 공지사항 조회는 GET만 인증 없이 허용
+                .requestMatchers(HttpMethod.GET, "/api/notices", "/api/notices/*").permitAll()
                 // 나머지는 인증 필요
                 .anyRequest().authenticated()
             )
