@@ -1,8 +1,9 @@
 package restapi.kculturebackend.common.exception;
 
+import org.springframework.http.HttpStatus;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 /**
  * 표준화된 에러 코드 Enum

@@ -16,6 +16,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,7 @@ public class JwtTokenProvider {
         try {
             // Base64로 인코딩된 키인 경우
             keyBytes = Decoders.BASE64.decode(secretKey);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | DecodingException e) {
             // 일반 문자열인 경우 - 최소 256비트(32바이트) 이상 필요
             log.warn("JWT secret is not Base64 encoded. Using raw string with padding if needed.");
             String paddedKey = secretKey;
