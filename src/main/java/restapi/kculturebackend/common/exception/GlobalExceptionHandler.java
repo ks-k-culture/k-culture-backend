@@ -17,29 +17,22 @@ import java.util.Map;
 
 /**
  * 전역 예외 처리 핸들러
+ * ErrorCode 기반으로 일관된 에러 응답 생성
  */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
-     * 비즈니스 예외 처리
+     * 비즈니스 예외 처리 (ErrorCode 기반)
      */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException ex) {
-        log.warn("Business exception: {}", ex.getMessage());
-        
-        HttpStatus status = switch (ex.getCode()) {
-            case "UNAUTHORIZED" -> HttpStatus.UNAUTHORIZED;
-            case "FORBIDDEN" -> HttpStatus.FORBIDDEN;
-            case "NOT_FOUND" -> HttpStatus.NOT_FOUND;
-            case "VALIDATION_ERROR" -> HttpStatus.BAD_REQUEST;
-            case "CONFLICT", "EMAIL_ALREADY_EXISTS" -> HttpStatus.CONFLICT;
-            default -> HttpStatus.BAD_REQUEST;
-        };
+        ErrorCode errorCode = ex.getErrorCode();
+        log.warn("Business exception [{}]: {}", errorCode.getCode(), ex.getFinalMessage());
 
-        ErrorResponse error = new ErrorResponse(ex.getCode(), ex.getMessage());
-        return ResponseEntity.status(status).body(ApiResponse.error(error));
+        ErrorResponse error = new ErrorResponse(errorCode.getCode(), ex.getFinalMessage());
+        return ResponseEntity.status(errorCode.getStatus()).body(ApiResponse.error(error));
     }
 
     /**
@@ -48,7 +41,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
         log.warn("Validation exception: {}", ex.getMessage());
-        
+
         Map<String, String> details = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
@@ -56,12 +49,9 @@ public class GlobalExceptionHandler {
             details.put(fieldName, errorMessage);
         });
 
-        ErrorResponse error = new ErrorResponse(
-                "VALIDATION_ERROR",
-                "입력값이 올바르지 않습니다.",
-                details
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(error));
+        ErrorCode errorCode = ErrorCode.VALIDATION_ERROR;
+        ErrorResponse error = new ErrorResponse(errorCode.getCode(), errorCode.getMessage(), details);
+        return ResponseEntity.status(errorCode.getStatus()).body(ApiResponse.error(error));
     }
 
     /**
@@ -70,8 +60,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException ex) {
         log.warn("Authentication exception: {}", ex.getMessage());
-        ErrorResponse error = new ErrorResponse("UNAUTHORIZED", "인증이 필요합니다.");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(error));
+        
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        ErrorResponse error = new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
+        return ResponseEntity.status(errorCode.getStatus()).body(ApiResponse.error(error));
     }
 
     /**
@@ -80,21 +72,33 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException ex) {
         log.warn("Access denied: {}", ex.getMessage());
-        ErrorResponse error = new ErrorResponse("FORBIDDEN", "접근 권한이 없습니다.");
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(error));
+        
+        ErrorCode errorCode = ErrorCode.FORBIDDEN;
+        ErrorResponse error = new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
+        return ResponseEntity.status(errorCode.getStatus()).body(ApiResponse.error(error));
     }
 
     /**
-     * 기타 예외 처리
+     * IllegalArgumentException 처리
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.warn("Illegal argument: {}", ex.getMessage());
+        
+        ErrorCode errorCode = ErrorCode.VALIDATION_ERROR;
+        ErrorResponse error = new ErrorResponse(errorCode.getCode(), ex.getMessage());
+        return ResponseEntity.status(errorCode.getStatus()).body(ApiResponse.error(error));
+    }
+
+    /**
+     * 기타 예외 처리 (예상치 못한 에러)
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception ex) {
         log.error("Unexpected exception occurred", ex);
-        ErrorResponse error = new ErrorResponse(
-                "INTERNAL_SERVER_ERROR",
-                "서버 내부 오류가 발생했습니다."
-        );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error(error));
+        
+        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+        ErrorResponse error = new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
+        return ResponseEntity.status(errorCode.getStatus()).body(ApiResponse.error(error));
     }
 }
-

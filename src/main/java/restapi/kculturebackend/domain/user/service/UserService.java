@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import restapi.kculturebackend.common.exception.ErrorCode;
 import restapi.kculturebackend.common.exception.NotFoundException;
 import restapi.kculturebackend.domain.user.dto.NotificationSettingsDto;
 import restapi.kculturebackend.domain.user.dto.UpdateProfileRequest;
@@ -33,7 +34,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserProfileResponse getMyProfile(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("사용자"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         UserProfile profile = userProfileRepository.findByUserId(userId).orElse(null);
 
@@ -46,7 +47,7 @@ public class UserService {
     @Transactional
     public UserProfileResponse updateProfile(UUID userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("사용자"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // User 이름 업데이트
         if (request.getName() != null) {
@@ -84,7 +85,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public NotificationSettingsDto getNotificationSettings(UUID userId) {
         UserProfile profile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("사용자 프로필"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_PROFILE_NOT_FOUND));
 
         NotificationSettings settings = profile.getNotificationSettings();
         if (settings == null) {
@@ -102,7 +103,7 @@ public class UserService {
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new NotFoundException("사용자"));
+                            .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
                     UserProfile newProfile = UserProfile.createDefault(user);
                     return userProfileRepository.save(newProfile);
                 });

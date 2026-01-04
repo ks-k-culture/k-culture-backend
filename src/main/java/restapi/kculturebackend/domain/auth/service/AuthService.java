@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import restapi.kculturebackend.common.exception.ConflictException;
+import restapi.kculturebackend.common.exception.ErrorCode;
 import restapi.kculturebackend.common.exception.NotFoundException;
 import restapi.kculturebackend.common.exception.UnauthorizedException;
 import restapi.kculturebackend.common.exception.ValidationException;
@@ -51,7 +52,7 @@ public class AuthService {
 
         // 사용자 정보 조회
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UnauthorizedException("이메일 또는 비밀번호가 올바르지 않습니다."));
+                .orElseThrow(() -> new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS));
 
         // 토큰 생성
         String accessToken = jwtTokenProvider.createAccessToken(user.getEmail(), user.getId().toString());
@@ -74,17 +75,17 @@ public class AuthService {
     public SignupResponse signup(SignupRequest request) {
         // 비밀번호 확인
         if (!request.getPassword().equals(request.getPasswordConfirm())) {
-            throw new ValidationException("비밀번호가 일치하지 않습니다.");
+            throw new ValidationException(ErrorCode.PASSWORD_MISMATCH);
         }
 
         // 이메일 중복 체크
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ConflictException("EMAIL_ALREADY_EXISTS", "이미 사용 중인 이메일입니다.");
+            throw new ConflictException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         // 약관 동의 확인
         if (!request.getTermsAgreed() || !request.getPrivacyAgreed()) {
-            throw new ValidationException("필수 약관에 동의해야 합니다.");
+            throw new ValidationException(ErrorCode.TERMS_NOT_AGREED);
         }
 
         // 사용자 생성
@@ -129,16 +130,16 @@ public class AuthService {
 
         // Refresh Token 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new UnauthorizedException("유효하지 않거나 만료된 Refresh Token입니다.");
+            throw new UnauthorizedException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         // Redis에서 Refresh Token 조회
         RefreshToken storedToken = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new UnauthorizedException("유효하지 않은 Refresh Token입니다."));
+                .orElseThrow(() -> new UnauthorizedException(ErrorCode.INVALID_REFRESH_TOKEN));
 
         // 사용자 조회
         User user = userRepository.findByEmail(storedToken.getEmail())
-                .orElseThrow(() -> new NotFoundException("사용자"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 새 토큰 생성
         String newAccessToken = jwtTokenProvider.createAccessToken(user.getEmail(), user.getId().toString());
@@ -160,7 +161,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public void forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new NotFoundException("사용자"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // TODO: 실제로는 이메일 발송 로직 구현 필요
         // 임시로 토큰 생성만 (실제로는 이메일로 전송)
@@ -175,18 +176,18 @@ public class AuthService {
     public void resetPassword(ResetPasswordRequest request) {
         // 비밀번호 확인
         if (!request.getPassword().equals(request.getPasswordConfirm())) {
-            throw new ValidationException("비밀번호가 일치하지 않습니다.");
+            throw new ValidationException(ErrorCode.PASSWORD_MISMATCH);
         }
 
         // 토큰 검증
         if (!jwtTokenProvider.validateToken(request.getToken())) {
-            throw new ValidationException("INVALID_TOKEN", "유효하지 않거나 만료된 토큰입니다.");
+            throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
         }
 
         // 사용자 조회
         String email = jwtTokenProvider.getEmailFromToken(request.getToken());
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("사용자"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 비밀번호 변경
         user.updatePassword(passwordEncoder.encode(request.getPassword()));
@@ -200,7 +201,7 @@ public class AuthService {
     @Transactional
     public void deleteAccount(String userId) {
         User user = userRepository.findById(java.util.UUID.fromString(userId))
-                .orElseThrow(() -> new NotFoundException("사용자"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         user.deactivate();
         userRepository.save(user);
