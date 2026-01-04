@@ -49,7 +49,6 @@ public class NotificationSettings extends BaseEntity {
     public static NotificationSettings createDefault(UserProfile userProfile) {
         return NotificationSettings.builder()
                 .userProfile(userProfile)
-                .userId(userProfile.getUserId())
                 .castingNotification(true)
                 .messageNotification(true)
                 .marketingNotification(false)

@@ -12,4 +12,8 @@ public class ForbiddenException extends BusinessException {
     public ForbiddenException(String customMessage) {
         super(ErrorCode.FORBIDDEN, customMessage);
     }
+
+    public ForbiddenException(ErrorCode errorCode, String customMessage) {
+        super(errorCode, customMessage);
+    }
 }

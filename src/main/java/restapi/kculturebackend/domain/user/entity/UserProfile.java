@@ -65,7 +65,6 @@ public class UserProfile extends BaseEntity {
     public static UserProfile createDefault(User user) {
         UserProfile profile = UserProfile.builder()
                 .user(user)
-                .userId(user.getId())
                 .build();
         
         // 기본 알림 설정 생성

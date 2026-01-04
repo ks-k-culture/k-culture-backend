@@ -1,0 +1,55 @@
+package restapi.kculturebackend.domain.actor.dto;
+
+import lombok.Builder;
+import lombok.Getter;
+import restapi.kculturebackend.domain.actor.entity.ActorProfile;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * 배우 상세 조회 응답 DTO
+ */
+@Getter
+@Builder
+public class ActorDetailResponse {
+    private UUID id;
+    private String email;
+    private String name;
+    private String stageName;
+    private String profileImage;
+    private Integer birthYear;
+    private String introduction;
+    private String nationality;
+    private Integer height;
+    private Integer weight;
+    private List<String> skills;
+    private List<String> languages;
+    private String agency;
+    private Boolean isProfileComplete;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    public static ActorDetailResponse from(ActorProfile actor) {
+        return ActorDetailResponse.builder()
+                .id(actor.getUserId())
+                .email(actor.getUser().getEmail())
+                .name(actor.getUser().getName())
+                .stageName(actor.getStageName())
+                .profileImage(actor.getUser().getProfileImage())
+                .birthYear(actor.getBirthYear())
+                .introduction(actor.getIntroduction())
+                .nationality(actor.getNationality())
+                .height(actor.getHeight())
+                .weight(actor.getWeight())
+                .skills(actor.getSkills())
+                .languages(actor.getLanguages())
+                .agency(actor.getAgency())
+                .isProfileComplete(actor.getIsProfileComplete())
+                .createdAt(actor.getCreatedAt())
+                .updatedAt(actor.getUpdatedAt())
+                .build();
+    }
+}
+

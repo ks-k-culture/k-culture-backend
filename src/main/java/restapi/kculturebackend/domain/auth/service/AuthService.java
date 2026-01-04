@@ -1,23 +1,37 @@
 package restapi.kculturebackend.domain.auth.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import restapi.kculturebackend.common.exception.ConflictException;
 import restapi.kculturebackend.common.exception.ErrorCode;
 import restapi.kculturebackend.common.exception.NotFoundException;
 import restapi.kculturebackend.common.exception.UnauthorizedException;
 import restapi.kculturebackend.common.exception.ValidationException;
-import restapi.kculturebackend.domain.auth.dto.*;
+import restapi.kculturebackend.domain.actor.entity.ActorProfile;
+import restapi.kculturebackend.domain.actor.repository.ActorProfileRepository;
+import restapi.kculturebackend.domain.agency.entity.AgencyProfile;
+import restapi.kculturebackend.domain.agency.repository.AgencyProfileRepository;
+import restapi.kculturebackend.domain.auth.dto.AuthTokens;
+import restapi.kculturebackend.domain.auth.dto.ForgotPasswordRequest;
+import restapi.kculturebackend.domain.auth.dto.LoginRequest;
+import restapi.kculturebackend.domain.auth.dto.LoginResponse;
+import restapi.kculturebackend.domain.auth.dto.RefreshTokenRequest;
+import restapi.kculturebackend.domain.auth.dto.ResetPasswordRequest;
+import restapi.kculturebackend.domain.auth.dto.SignupRequest;
+import restapi.kculturebackend.domain.auth.dto.SignupResponse;
+import restapi.kculturebackend.domain.auth.dto.UserInfo;
 import restapi.kculturebackend.domain.auth.entity.RefreshToken;
 import restapi.kculturebackend.domain.auth.repository.RefreshTokenRepository;
 import restapi.kculturebackend.domain.user.entity.User;
 import restapi.kculturebackend.domain.user.entity.UserProfile;
+import restapi.kculturebackend.domain.user.entity.UserType;
 import restapi.kculturebackend.domain.user.repository.UserProfileRepository;
 import restapi.kculturebackend.domain.user.repository.UserRepository;
 import restapi.kculturebackend.security.jwt.JwtTokenProvider;
@@ -32,6 +46,8 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
+    private final ActorProfileRepository actorProfileRepository;
+    private final AgencyProfileRepository agencyProfileRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -99,9 +115,20 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
         
-        // UserProfile 자동 생성
+        // UserProfile 자동 생성 (공통 프로필)
         UserProfile profile = UserProfile.createDefault(savedUser);
         userProfileRepository.save(profile);
+        
+        // 사용자 타입에 따라 전용 프로필 생성
+        if (savedUser.getType() == UserType.ACTOR) {
+            ActorProfile actorProfile = ActorProfile.createDefault(savedUser);
+            actorProfileRepository.save(actorProfile);
+            log.info("Actor profile created for user: {}", savedUser.getEmail());
+        } else if (savedUser.getType() == UserType.AGENCY) {
+            AgencyProfile agencyProfile = AgencyProfile.createDefault(savedUser);
+            agencyProfileRepository.save(agencyProfile);
+            log.info("Agency profile created for user: {}", savedUser.getEmail());
+        }
         
         log.info("New user registered: {} ({})", savedUser.getEmail(), savedUser.getType());
 
