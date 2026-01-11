@@ -33,8 +33,8 @@ public interface JobRepository extends JpaRepository<Job, UUID> {
            "(:category IS NULL OR j.category = :category) AND " +
            "(:gender IS NULL OR j.gender = :gender) AND " +
            "(:isPumasi IS NULL OR j.isPumasi = :isPumasi) AND " +
-           "(:search IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(j.workTitle) LIKE LOWER(CONCAT('%', :search, '%')))")
+           "(COALESCE(:search, '') = '' OR LOWER(j.title) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR " +
+           "LOWER(j.workTitle) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))")
     Page<Job> searchJobs(
             @Param("status") JobStatus status,
             @Param("category") JobCategory category,
