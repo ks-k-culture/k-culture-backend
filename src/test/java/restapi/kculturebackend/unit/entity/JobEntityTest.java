@@ -1,12 +1,12 @@
 package restapi.kculturebackend.unit.entity;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import restapi.kculturebackend.domain.job.entity.Job;
 import restapi.kculturebackend.domain.job.entity.JobCategory;
 import restapi.kculturebackend.domain.job.entity.JobStatus;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Job 엔티티 단위 테스트

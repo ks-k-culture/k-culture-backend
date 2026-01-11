@@ -1,11 +1,14 @@
 package restapi.kculturebackend.domain.favorite.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import restapi.kculturebackend.common.exception.ConflictException;
 import restapi.kculturebackend.common.exception.ErrorCode;
 import restapi.kculturebackend.common.exception.NotFoundException;
@@ -17,8 +20,6 @@ import restapi.kculturebackend.domain.favorite.entity.Favorite;
 import restapi.kculturebackend.domain.favorite.entity.FavoriteType;
 import restapi.kculturebackend.domain.favorite.repository.FavoriteRepository;
 import restapi.kculturebackend.domain.user.entity.User;
-
-import java.util.UUID;
 
 /**
  * 찜 목록 서비스

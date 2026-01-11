@@ -1,16 +1,17 @@
 package restapi.kculturebackend.domain.job.repository;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import restapi.kculturebackend.domain.job.entity.Job;
 import restapi.kculturebackend.domain.job.entity.JobCategory;
 import restapi.kculturebackend.domain.job.entity.JobStatus;
-
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * 작품구인 레포지토리

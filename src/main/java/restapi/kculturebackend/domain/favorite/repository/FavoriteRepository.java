@@ -1,15 +1,16 @@
 package restapi.kculturebackend.domain.favorite.repository;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import restapi.kculturebackend.domain.favorite.entity.Favorite;
 import restapi.kculturebackend.domain.favorite.entity.FavoriteType;
-
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * 찜 목록 레포지토리
