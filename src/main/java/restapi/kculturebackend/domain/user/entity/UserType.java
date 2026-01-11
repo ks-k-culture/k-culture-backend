@@ -1,5 +1,8 @@
 package restapi.kculturebackend.domain.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * 사용자 유형 (배우/에이전시)
  */
@@ -15,6 +18,7 @@ public enum UserType {
         this.description = description;
     }
 
+    @JsonValue
     public String getValue() {
         return value;
     }
@@ -22,5 +26,14 @@ public enum UserType {
     public String getDescription() {
         return description;
     }
-}
 
+    @JsonCreator
+    public static UserType fromValue(String value) {
+        for (UserType type : UserType.values()) {
+            if (type.value.equalsIgnoreCase(value) || type.name().equalsIgnoreCase(value)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Unknown UserType: " + value);
+    }
+}
