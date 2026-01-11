@@ -34,9 +34,7 @@ public class JobController {
 
     private final JobService jobService;
 
-    /**
-     * 작품구인 목록 조회
-     */
+    // 작품구인 목록 조회
     @Operation(summary = "작품구인 목록 조회", description = "필터 조건으로 작품구인 목록을 검색합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<PaginationResponse<JobSummaryResponse>>> getJobs(
@@ -52,9 +50,7 @@ public class JobController {
         return ResponseEntity.ok(ApiResponse.success(PaginationResponse.from(jobs)));
     }
 
-    /**
-     * 작품구인 상세 조회
-     */
+    // 작품구인 상세 조회
     @Operation(summary = "작품구인 상세 조회", description = "작품구인 공고 상세 정보를 조회합니다.")
     @GetMapping("/{jobId}")
     public ResponseEntity<ApiResponse<JobDetailResponse>> getJob(
@@ -64,9 +60,7 @@ public class JobController {
         return ResponseEntity.ok(ApiResponse.success(job));
     }
 
-    /**
-     * 작품구인 등록
-     */
+    // 작품구인 등록
     @Operation(summary = "작품구인 등록", description = "새 작품구인 공고를 등록합니다.")
     @PostMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> createJob(
@@ -80,9 +74,7 @@ public class JobController {
         )));
     }
 
-    /**
-     * 작품구인 수정
-     */
+    // 작품구인 수정
     @Operation(summary = "작품구인 수정", description = "작품구인 공고를 수정합니다.")
     @PutMapping("/{jobId}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> updateJob(
@@ -97,9 +89,7 @@ public class JobController {
         )));
     }
 
-    /**
-     * 작품구인 삭제
-     */
+    // 작품구인 삭제
     @Operation(summary = "작품구인 삭제", description = "작품구인 공고를 삭제합니다.")
     @DeleteMapping("/{jobId}")
     public ResponseEntity<ApiResponse<Map<String, String>>> deleteJob(

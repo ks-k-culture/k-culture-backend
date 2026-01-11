@@ -31,9 +31,7 @@ public class CharacterController {
 
     private final CharacterService characterService;
 
-    /**
-     * 프로젝트별 캐릭터 목록 조회
-     */
+    // 프로젝트별 캐릭터 목록 조회
     @Operation(summary = "캐릭터 목록 조회", description = "프로젝트에 속한 캐릭터 목록을 조회합니다.")
     @GetMapping("/projects/{projectId}/characters")
     public ResponseEntity<ApiResponse<Map<String, List<CharacterResponse>>>> getProjectCharacters(
@@ -43,9 +41,7 @@ public class CharacterController {
         return ResponseEntity.ok(ApiResponse.success(Map.of("characters", characters)));
     }
 
-    /**
-     * 캐릭터 생성
-     */
+    // 캐릭터 생성
     @Operation(summary = "캐릭터 생성", description = "프로젝트에 새로운 캐릭터를 추가합니다.")
     @PostMapping("/projects/{projectId}/characters")
     public ResponseEntity<ApiResponse<Map<String, Object>>> createCharacter(
@@ -61,9 +57,7 @@ public class CharacterController {
                 )));
     }
 
-    /**
-     * 캐릭터 수정
-     */
+    // 캐릭터 수정
     @Operation(summary = "캐릭터 수정", description = "캐릭터 정보를 수정합니다.")
     @PutMapping("/characters/{characterId}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> updateCharacter(
@@ -78,9 +72,7 @@ public class CharacterController {
         )));
     }
 
-    /**
-     * 캐릭터 삭제
-     */
+    // 캐릭터 삭제
     @Operation(summary = "캐릭터 삭제", description = "캐릭터를 삭제합니다.")
     @DeleteMapping("/characters/{characterId}")
     public ResponseEntity<ApiResponse<Map<String, String>>> deleteCharacter(

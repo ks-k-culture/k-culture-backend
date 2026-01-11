@@ -29,9 +29,7 @@ public class DashboardService {
     private final CharacterRepository characterRepository;
     private final FavoriteRepository favoriteRepository;
 
-    /**
-     * 배우 대시보드 통계 조회
-     */
+    // 배우 대시보드 통계 조회
     @Transactional(readOnly = true)
     public ActorDashboardStats getActorStats(User user) {
         // 실제 데이터 조회 로직 (현재는 더미 데이터)
@@ -47,9 +45,7 @@ public class DashboardService {
                 .build();
     }
 
-    /**
-     * 에이전시 대시보드 통계 조회
-     */
+    // 에이전시 대시보드 통계 조회
     @Transactional(readOnly = true)
     public AgencyDashboardStats getAgencyStats(User user) {
         // 진행중 프로젝트 수
@@ -69,16 +65,12 @@ public class DashboardService {
                 .build();
     }
 
-    /**
-     * 사용자 타입 확인
-     */
+    // 사용자 타입 확인
     public boolean isActor(User user) {
         return user.getType() == UserType.ACTOR;
     }
 
-    /**
-     * 프로필 완성도 계산
-     */
+    // 프로필 완성도 계산
     private int calculateProfileCompleteness(User user) {
         return actorProfileRepository.findById(user.getId())
                 .map(actor -> {

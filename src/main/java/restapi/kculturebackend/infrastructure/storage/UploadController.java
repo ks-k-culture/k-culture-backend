@@ -27,9 +27,7 @@ public class UploadController {
 
     private final FileStorageService fileStorageService;
 
-    /**
-     * 이미지 업로드
-     */
+    // 이미지 업로드
     @Operation(summary = "이미지 업로드", description = "프로필, 썸네일, 포트폴리오 이미지를 업로드합니다.")
     @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<UploadImageResponse>> uploadImage(
@@ -52,9 +50,7 @@ public class UploadController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    /**
-     * 영상 업로드
-     */
+    // 영상 업로드
     @Operation(summary = "영상 업로드", description = "쇼릴 영상을 업로드합니다.")
     @PostMapping(value = "/video", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<UploadVideoResponse>> uploadVideo(
@@ -83,9 +79,7 @@ public class UploadController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    /**
-     * 이미지 타입 문자열을 FileType으로 매핑
-     */
+    // 이미지 타입 문자열을 FileType으로 매핑
     private FileType mapImageType(String type) {
         return switch (type.toLowerCase()) {
             case "profile" -> FileType.PROFILE_IMAGE;

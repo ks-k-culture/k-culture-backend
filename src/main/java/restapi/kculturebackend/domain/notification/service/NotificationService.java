@@ -26,9 +26,7 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
-    /**
-     * 알림 목록 조회
-     */
+    // 알림 목록 조회
     @Transactional(readOnly = true)
     public Page<NotificationResponse> getNotifications(User user, Boolean isRead, NotificationType type, Pageable pageable) {
         Page<Notification> notifications;
@@ -44,17 +42,13 @@ public class NotificationService {
         return notifications.map(NotificationResponse::from);
     }
 
-    /**
-     * 읽지 않은 알림 수 조회
-     */
+    // 읽지 않은 알림 수 조회
     @Transactional(readOnly = true)
     public long getUnreadCount(User user) {
         return notificationRepository.countByUserIdAndIsReadFalse(user.getId());
     }
 
-    /**
-     * 알림 읽음 처리
-     */
+    // 알림 읽음 처리
     @Transactional
     public void markAsRead(User user, UUID notificationId) {
         Notification notification = notificationRepository.findByIdAndUserId(notificationId, user.getId())
@@ -66,9 +60,7 @@ public class NotificationService {
         log.info("Notification marked as read: userId={}, notificationId={}", user.getId(), notificationId);
     }
 
-    /**
-     * 모든 알림 읽음 처리
-     */
+    // 모든 알림 읽음 처리
     @Transactional
     public int markAllAsRead(User user) {
         int updatedCount = notificationRepository.markAllAsRead(user.getId());
@@ -76,9 +68,7 @@ public class NotificationService {
         return updatedCount;
     }
 
-    /**
-     * 알림 생성 (내부 사용)
-     */
+    // 알림 생성 (내부 사용)
     @Transactional
     public Notification createNotification(User user, NotificationType type, String title, String message, UUID relatedId) {
         Notification notification = Notification.create(user, type, title, message, relatedId);

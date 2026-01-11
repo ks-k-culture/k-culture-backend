@@ -26,9 +26,7 @@ public class NoticeService {
 
     private final NoticeRepository noticeRepository;
 
-    /**
-     * 공지사항 목록 조회
-     */
+    // 공지사항 목록 조회
     @Transactional(readOnly = true)
     public Page<NoticeSummaryResponse> getNotices(NoticeType type, Pageable pageable) {
         Page<Notice> notices;
@@ -42,9 +40,7 @@ public class NoticeService {
         return notices.map(NoticeSummaryResponse::from);
     }
 
-    /**
-     * 공지사항 상세 조회
-     */
+    // 공지사항 상세 조회
     @Transactional
     public NoticeDetailResponse getNotice(UUID noticeId) {
         Notice notice = noticeRepository.findById(noticeId)

@@ -13,13 +13,9 @@ import java.util.UUID;
  */
 public interface NoticeRepository extends JpaRepository<Notice, UUID> {
 
-    /**
-     * 공지사항 목록 조회 (타입별)
-     */
+    // 공지사항 목록 조회 (타입별)
     Page<Notice> findByType(NoticeType type, Pageable pageable);
 
-    /**
-     * 공지사항 목록 조회 (전체)
-     */
+    // 공지사항 목록 조회 (전체)
     Page<Notice> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

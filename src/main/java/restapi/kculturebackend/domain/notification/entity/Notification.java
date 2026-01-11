@@ -47,16 +47,12 @@ public class Notification extends BaseEntity {
     @Column(name = "related_id", columnDefinition = "UUID")
     private UUID relatedId;
 
-    /**
-     * 알림 읽음 처리
-     */
+    // 알림 읽음 처리
     public void markAsRead() {
         this.isRead = true;
     }
 
-    /**
-     * 알림 생성
-     */
+    // 알림 생성
     public static Notification create(User user, NotificationType type, String title, String message, UUID relatedId) {
         return Notification.builder()
                 .user(user)

@@ -81,16 +81,12 @@ public class Job extends BaseEntity {
     @Column(name = "contact_phone", length = 20)
     private String contactPhone;
 
-    /**
-     * 조회수 증가
-     */
+    // 조회수 증가
     public void incrementViews() {
         this.views++;
     }
 
-    /**
-     * 작품구인 수정
-     */
+    // 작품구인 수정
     public void update(JobCategory category, Boolean isPumasi, Integer price, String title,
                        String description, String gender, String ageRange, String production,
                        String workTitle, String shootingDate, String shootingLocation,
@@ -110,9 +106,7 @@ public class Job extends BaseEntity {
         this.contactPhone = contactPhone;
     }
 
-    /**
-     * 마감 처리
-     */
+    // 마감 처리
     public void close() {
         this.status = JobStatus.CLOSED;
     }

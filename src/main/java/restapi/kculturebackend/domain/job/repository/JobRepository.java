@@ -17,24 +17,16 @@ import java.util.UUID;
  */
 public interface JobRepository extends JpaRepository<Job, UUID> {
 
-    /**
-     * 작품구인 목록 조회 (페이징)
-     */
+    // 작품구인 목록 조회 (페이징)
     Page<Job> findByStatus(JobStatus status, Pageable pageable);
 
-    /**
-     * 작품구인 목록 조회 (카테고리별)
-     */
+    // 작품구인 목록 조회 (카테고리별)
     Page<Job> findByCategory(JobCategory category, Pageable pageable);
 
-    /**
-     * 작품구인 목록 조회 (상태 + 카테고리)
-     */
+    // 작품구인 목록 조회 (상태 + 카테고리)
     Page<Job> findByStatusAndCategory(JobStatus status, JobCategory category, Pageable pageable);
 
-    /**
-     * 검색
-     */
+    // 검색
     @Query("SELECT j FROM Job j WHERE " +
            "(:status IS NULL OR j.status = :status) AND " +
            "(:category IS NULL OR j.category = :category) AND " +
@@ -50,9 +42,7 @@ public interface JobRepository extends JpaRepository<Job, UUID> {
             @Param("search") String search,
             Pageable pageable);
 
-    /**
-     * 사용자의 작품구인 조회
-     */
+    // 사용자의 작품구인 조회
     @Query("SELECT j FROM Job j WHERE j.id = :jobId AND j.user.id = :userId")
     Optional<Job> findByIdAndUserId(@Param("jobId") UUID jobId, @Param("userId") UUID userId);
 }

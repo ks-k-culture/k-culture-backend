@@ -16,29 +16,19 @@ import java.util.UUID;
  */
 public interface FavoriteRepository extends JpaRepository<Favorite, UUID> {
 
-    /**
-     * 사용자의 찜 목록 조회 (페이징)
-     */
+    // 사용자의 찜 목록 조회 (페이징)
     Page<Favorite> findByUserId(UUID userId, Pageable pageable);
 
-    /**
-     * 사용자의 찜 목록 조회 (타입별)
-     */
+    // 사용자의 찜 목록 조회 (타입별)
     Page<Favorite> findByUserIdAndType(UUID userId, FavoriteType type, Pageable pageable);
 
-    /**
-     * 특정 찜 조회 (사용자 + 대상)
-     */
+    // 특정 찜 조회 (사용자 + 대상)
     Optional<Favorite> findByUserIdAndTargetIdAndType(UUID userId, UUID targetId, FavoriteType type);
 
-    /**
-     * 찜 존재 여부 확인
-     */
+    // 찜 존재 여부 확인
     boolean existsByUserIdAndTargetIdAndType(UUID userId, UUID targetId, FavoriteType type);
 
-    /**
-     * 사용자의 특정 찜 조회
-     */
+    // 사용자의 특정 찜 조회
     @Query("SELECT f FROM Favorite f WHERE f.id = :favoriteId AND f.user.id = :userId")
     Optional<Favorite> findByIdAndUserId(@Param("favoriteId") UUID favoriteId, @Param("userId") UUID userId);
 }

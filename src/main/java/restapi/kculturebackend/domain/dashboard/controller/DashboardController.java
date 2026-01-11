@@ -25,9 +25,7 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    /**
-     * 대시보드 통계 조회
-     */
+    // 대시보드 통계 조회
     @Operation(summary = "대시보드 통계 조회", description = "사용자 유형에 따른 대시보드 통계 정보를 조회합니다.")
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<?>> getDashboardStats(@AuthenticationPrincipal User user) {

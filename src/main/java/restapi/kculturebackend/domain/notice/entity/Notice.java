@@ -39,9 +39,7 @@ public class Notice extends BaseEntity {
     @Builder.Default
     private Integer views = 0;
 
-    /**
-     * 조회수 증가
-     */
+    // 조회수 증가
     public void incrementViews() {
         this.views++;
     }

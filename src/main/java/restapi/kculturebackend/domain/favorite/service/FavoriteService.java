@@ -31,9 +31,7 @@ public class FavoriteService {
     private final FavoriteRepository favoriteRepository;
     private final ActorProfileRepository actorProfileRepository;
 
-    /**
-     * 찜 목록 조회
-     */
+    // 찜 목록 조회
     @Transactional(readOnly = true)
     public Page<FavoriteResponse> getFavorites(User user, FavoriteType type, Pageable pageable) {
         Page<Favorite> favorites;
@@ -54,9 +52,7 @@ public class FavoriteService {
         });
     }
 
-    /**
-     * 찜 추가
-     */
+    // 찜 추가
     @Transactional
     public FavoriteResponse addFavorite(User user, CreateFavoriteRequest request) {
         // 중복 체크
@@ -75,9 +71,7 @@ public class FavoriteService {
         return FavoriteResponse.from(saved);
     }
 
-    /**
-     * 찜 삭제
-     */
+    // 찜 삭제
     @Transactional
     public void deleteFavorite(User user, UUID favoriteId) {
         Favorite favorite = favoriteRepository.findByIdAndUserId(favoriteId, user.getId())
@@ -87,9 +81,7 @@ public class FavoriteService {
         log.info("Favorite deleted: user={}, favoriteId={}", user.getId(), favoriteId);
     }
 
-    /**
-     * 대상 존재 확인
-     */
+    // 대상 존재 확인
     private void validateTargetExists(UUID targetId, FavoriteType type) {
         boolean exists = switch (type) {
             case ACTOR -> actorProfileRepository.existsById(targetId);

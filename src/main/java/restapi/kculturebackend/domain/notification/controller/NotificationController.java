@@ -32,9 +32,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    /**
-     * 알림 목록 조회
-     */
+    // 알림 목록 조회
     @Operation(summary = "알림 목록 조회", description = "로그인한 사용자의 알림 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> getNotifications(
@@ -60,9 +58,7 @@ public class NotificationController {
         )));
     }
 
-    /**
-     * 알림 읽음 처리
-     */
+    // 알림 읽음 처리
     @Operation(summary = "알림 읽음 처리", description = "특정 알림을 읽음 상태로 변경합니다.")
     @PutMapping("/{notificationId}/read")
     public ResponseEntity<ApiResponse<Void>> markAsRead(
@@ -73,9 +69,7 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.success());
     }
 
-    /**
-     * 모든 알림 읽음 처리
-     */
+    // 모든 알림 읽음 처리
     @Operation(summary = "모든 알림 읽음 처리", description = "모든 알림을 읽음 상태로 변경합니다.")
     @PutMapping("/read-all")
     public ResponseEntity<ApiResponse<Map<String, Integer>>> markAllAsRead(

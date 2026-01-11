@@ -30,9 +30,7 @@ public class NoticeController {
 
     private final NoticeService noticeService;
 
-    /**
-     * 공지사항 목록 조회
-     */
+    // 공지사항 목록 조회
     @Operation(summary = "공지사항 목록 조회", description = "공지사항 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<PaginationResponse<NoticeSummaryResponse>>> getNotices(
@@ -43,9 +41,7 @@ public class NoticeController {
         return ResponseEntity.ok(ApiResponse.success(PaginationResponse.from(notices)));
     }
 
-    /**
-     * 공지사항 상세 조회
-     */
+    // 공지사항 상세 조회
     @Operation(summary = "공지사항 상세 조회", description = "공지사항 상세 내용을 조회합니다.")
     @GetMapping("/{noticeId}")
     public ResponseEntity<ApiResponse<NoticeDetailResponse>> getNotice(

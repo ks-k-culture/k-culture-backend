@@ -35,9 +35,7 @@ public class FavoriteController {
 
     private final FavoriteService favoriteService;
 
-    /**
-     * 찜 목록 조회
-     */
+    // 찜 목록 조회
     @Operation(summary = "찜 목록 조회", description = "로그인한 사용자의 찜 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<PaginationResponse<FavoriteResponse>>> getFavorites(
@@ -49,9 +47,7 @@ public class FavoriteController {
         return ResponseEntity.ok(ApiResponse.success(PaginationResponse.from(favorites)));
     }
 
-    /**
-     * 찜 추가
-     */
+    // 찜 추가
     @Operation(summary = "찜 추가", description = "배우 또는 프로젝트를 찜 목록에 추가합니다.")
     @PostMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> addFavorite(
@@ -66,9 +62,7 @@ public class FavoriteController {
         )));
     }
 
-    /**
-     * 찜 삭제
-     */
+    // 찜 삭제
     @Operation(summary = "찜 삭제", description = "찜 목록에서 항목을 삭제합니다.")
     @DeleteMapping("/{favoriteId}")
     public ResponseEntity<ApiResponse<Map<String, String>>> deleteFavorite(

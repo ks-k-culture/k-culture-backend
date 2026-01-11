@@ -39,9 +39,7 @@ public class Favorite extends BaseEntity {
     @Column(name = "type", nullable = false, length = 20)
     private FavoriteType type;
 
-    /**
-     * 새 찜 생성
-     */
+    // 새 찜 생성
     public static Favorite create(User user, UUID targetId, FavoriteType type) {
         return Favorite.builder()
                 .user(user)

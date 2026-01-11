@@ -28,9 +28,7 @@ public class JobService {
 
     private final JobRepository jobRepository;
 
-    /**
-     * 작품구인 목록 조회 (검색/필터)
-     */
+    // 작품구인 목록 조회 (검색/필터)
     @Transactional(readOnly = true)
     public Page<JobSummaryResponse> getJobs(JobCategory category, String gender, String ageRange,
                                              Boolean isPumasi, String status, String search, Pageable pageable) {
@@ -43,9 +41,7 @@ public class JobService {
         return jobs.map(JobSummaryResponse::from);
     }
 
-    /**
-     * 작품구인 상세 조회
-     */
+    // 작품구인 상세 조회
     @Transactional
     public JobDetailResponse getJob(UUID jobId) {
         Job job = jobRepository.findById(jobId)
@@ -58,9 +54,7 @@ public class JobService {
         return JobDetailResponse.from(job);
     }
 
-    /**
-     * 작품구인 생성
-     */
+    // 작품구인 생성
     @Transactional
     public JobDetailResponse createJob(User user, CreateJobRequest request) {
         Job job = Job.builder()
@@ -86,9 +80,7 @@ public class JobService {
         return JobDetailResponse.from(saved);
     }
 
-    /**
-     * 작품구인 수정
-     */
+    // 작품구인 수정
     @Transactional
     public JobDetailResponse updateJob(User user, UUID jobId, UpdateJobRequest request) {
         Job job = jobRepository.findByIdAndUserId(jobId, user.getId())
@@ -121,9 +113,7 @@ public class JobService {
         return JobDetailResponse.from(saved);
     }
 
-    /**
-     * 작품구인 삭제
-     */
+    // 작품구인 삭제
     @Transactional
     public void deleteJob(User user, UUID jobId) {
         Job job = jobRepository.findByIdAndUserId(jobId, user.getId())
