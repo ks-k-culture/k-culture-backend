@@ -1,20 +1,19 @@
 package restapi.kculturebackend.domain.actor.controller;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,11 +22,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import restapi.kculturebackend.common.dto.ApiResponse;
 import restapi.kculturebackend.common.dto.PaginationResponse;
-import restapi.kculturebackend.domain.actor.dto.ActorDetailResponse;
-import restapi.kculturebackend.domain.actor.dto.ActorSummaryResponse;
-import restapi.kculturebackend.domain.actor.dto.UpdateActorProfileRequest;
+import restapi.kculturebackend.domain.actor.dto.*;
 import restapi.kculturebackend.domain.actor.service.ActorService;
 import restapi.kculturebackend.domain.user.entity.User;
+import restapi.kculturebackend.infrastructure.storage.FileStorageService;
+import restapi.kculturebackend.infrastructure.storage.FileType;
+import restapi.kculturebackend.infrastructure.storage.UploadResult;
 
 /**
  * 배우 API 컨트롤러
@@ -39,6 +39,7 @@ import restapi.kculturebackend.domain.user.entity.User;
 public class ActorController {
 
     private final ActorService actorService;
+    private final FileStorageService fileStorageService;
 
     /**
      * 배우 목록 조회
@@ -100,6 +101,85 @@ public class ActorController {
         
         ActorDetailResponse profile = actorService.updateProfile(user, request);
         return ResponseEntity.ok(ApiResponse.success(profile));
+    }
+
+    /**
+     * 배우 프로필 등록
+     */
+    @Operation(summary = "배우 프로필 등록", description = "배우 회원가입 시 프로필을 등록합니다.")
+    @PostMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<Map<String, Object>>> createProfile(
+            @AuthenticationPrincipal User user,
+            @Parameter(description = "활동명") @RequestParam("name") String name,
+            @Parameter(description = "한 줄 소개") @RequestParam("introduction") String introduction,
+            @Parameter(description = "나이대") @RequestParam("ageGroup") String ageGroup,
+            @Parameter(description = "프로필 이미지") @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+
+        String profileImageUrl = null;
+        if (profileImage != null && !profileImage.isEmpty()) {
+            UploadResult uploadResult = fileStorageService.upload(profileImage, FileType.PROFILE_IMAGE);
+            profileImageUrl = uploadResult.getUrl();
+        }
+
+        CreateActorProfileRequest request = CreateActorProfileRequest.builder()
+                .name(name)
+                .introduction(introduction)
+                .ageGroup(ageGroup)
+                .build();
+
+        ActorDetailResponse profile = actorService.createProfile(user, request, profileImageUrl);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(Map.of(
+                "actorId", profile.getId(),
+                "name", profile.getStageName() != null ? profile.getStageName() : profile.getName(),
+                "profileImageUrl", profile.getProfileImage() != null ? profile.getProfileImage() : ""
+        )));
+    }
+
+    /**
+     * AI 배우 추천
+     */
+    @Operation(summary = "AI 배우 추천", description = "프로젝트/캐릭터 정보 기반 AI 배우 추천")
+    @PostMapping("/recommend")
+    public ResponseEntity<ApiResponse<Map<String, List<ActorRecommendResponse>>>> recommendActors(
+            @AuthenticationPrincipal User user,
+            @RequestBody ActorRecommendRequest request) {
+
+        List<ActorRecommendResponse> recommendations = actorService.recommendActors(user, request);
+        return ResponseEntity.ok(ApiResponse.success(Map.of("recommendedActors", recommendations)));
+    }
+
+    /**
+     * 포트폴리오 다운로드
+     */
+    @Operation(summary = "포트폴리오 다운로드", description = "배우 포트폴리오 PDF 다운로드 (현재 미구현)")
+    @GetMapping("/{actorId}/portfolio")
+    public ResponseEntity<ApiResponse<Map<String, String>>> downloadPortfolio(
+            @Parameter(description = "배우 ID") @PathVariable UUID actorId) {
+
+        // TODO: PDF 생성 로직 구현 필요
+        // 현재는 플레이스홀더 응답
+        return ResponseEntity.ok(ApiResponse.success(Map.of(
+                "message", "포트폴리오 다운로드 기능은 추후 구현 예정입니다.",
+                "actorId", actorId.toString()
+        )));
+    }
+
+    /**
+     * 배우에게 연락하기
+     */
+    @Operation(summary = "배우 연락하기", description = "에이전시가 배우에게 캐스팅 제안을 전송합니다.")
+    @PostMapping("/{actorId}/contact")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> contactActor(
+            @AuthenticationPrincipal User user,
+            @Parameter(description = "배우 ID") @PathVariable UUID actorId,
+            @Valid @RequestBody ContactActorRequest request) {
+
+        UUID contactId = actorService.contactActor(user, actorId, request);
+        return ResponseEntity.ok(ApiResponse.success(Map.of(
+                "contactId", contactId,
+                "status", "sent"
+        )));
     }
 }
 
