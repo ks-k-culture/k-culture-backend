@@ -39,5 +39,11 @@ public interface CharacterRepository extends JpaRepository<Character, UUID> {
      */
     @Query("SELECT COUNT(c) FROM Character c WHERE c.project.id = :projectId")
     long countByProjectId(@Param("projectId") UUID projectId);
+
+    /**
+     * 에이전시별 전체 캐릭터 수
+     */
+    @Query("SELECT COUNT(c) FROM Character c WHERE c.project.agency.userId = :userId")
+    long countByAgencyUserId(@Param("userId") UUID userId);
 }
 

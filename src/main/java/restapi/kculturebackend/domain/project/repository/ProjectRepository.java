@@ -55,5 +55,11 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
                          @Param("type") ProjectType type,
                          @Param("status") ProjectStatus status,
                          Pageable pageable);
+
+    /**
+     * 에이전시별 진행중 프로젝트 수
+     */
+    @Query("SELECT COUNT(p) FROM Project p WHERE p.agency.userId = :userId AND p.status IN ('CASTING', 'PRE_PRODUCTION', 'IN_PRODUCTION')")
+    long countActiveProjectsByAgencyUserId(@Param("userId") UUID userId);
 }
 
