@@ -8,6 +8,7 @@ import restapi.kculturebackend.common.exception.ErrorCode;
 import restapi.kculturebackend.common.exception.ForbiddenException;
 import restapi.kculturebackend.common.exception.NotFoundException;
 import restapi.kculturebackend.domain.agency.dto.AgencyProfileResponse;
+import restapi.kculturebackend.domain.agency.dto.CreateAgencyProfileRequest;
 import restapi.kculturebackend.domain.agency.dto.UpdateAgencyProfileRequest;
 import restapi.kculturebackend.domain.agency.entity.AgencyProfile;
 import restapi.kculturebackend.domain.agency.repository.AgencyProfileRepository;
@@ -48,6 +49,30 @@ public class AgencyService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.AGENCY_PROFILE_NOT_FOUND));
 
         return AgencyProfileResponse.from(agency);
+    }
+
+    /**
+     * 에이전시 프로필 등록
+     */
+    @Transactional
+    public AgencyProfileResponse createProfile(User user, CreateAgencyProfileRequest request) {
+        validateAgencyUser(user);
+
+        AgencyProfile agency = agencyProfileRepository.findById(user.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.AGENCY_PROFILE_NOT_FOUND));
+
+        agency.updateProfile(
+                request.getAgencyName(),
+                request.getRepresentativeName(),
+                request.getFoundedYear(),
+                null, null, null, null, null,
+                request.getSpecialties()
+        );
+
+        AgencyProfile savedAgency = agencyProfileRepository.save(agency);
+        log.info("Agency profile created: {}", user.getId());
+
+        return AgencyProfileResponse.from(savedAgency);
     }
 
     /**

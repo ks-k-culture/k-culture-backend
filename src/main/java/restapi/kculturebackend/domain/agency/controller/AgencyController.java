@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import restapi.kculturebackend.common.dto.ApiResponse;
 import restapi.kculturebackend.domain.agency.dto.AgencyProfileResponse;
+import restapi.kculturebackend.domain.agency.dto.CreateAgencyProfileRequest;
 import restapi.kculturebackend.domain.agency.dto.UpdateAgencyProfileRequest;
 import restapi.kculturebackend.domain.agency.service.AgencyService;
 import restapi.kculturebackend.domain.user.entity.User;
@@ -26,6 +28,19 @@ import java.util.UUID;
 public class AgencyController {
 
     private final AgencyService agencyService;
+
+    /**
+     * 에이전시 프로필 등록
+     */
+    @Operation(summary = "프로필 등록", description = "에이전시 회원가입 시 프로필을 등록합니다.")
+    @PostMapping("/profile")
+    public ResponseEntity<ApiResponse<AgencyProfileResponse>> createProfile(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody CreateAgencyProfileRequest request) {
+
+        AgencyProfileResponse profile = agencyService.createProfile(user, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(profile));
+    }
 
     /**
      * 내 에이전시 프로필 조회
