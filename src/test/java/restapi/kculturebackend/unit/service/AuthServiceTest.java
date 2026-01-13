@@ -11,13 +11,16 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import restapi.kculturebackend.common.exception.ConflictException;
+import restapi.kculturebackend.common.exception.UnauthorizedException;
 import restapi.kculturebackend.common.exception.ValidationException;
 import restapi.kculturebackend.domain.actor.repository.ActorProfileRepository;
 import restapi.kculturebackend.domain.agency.repository.AgencyProfileRepository;
+import restapi.kculturebackend.domain.auth.dto.AuthTokens;
 import restapi.kculturebackend.domain.auth.dto.LoginRequest;
 import restapi.kculturebackend.domain.auth.dto.LoginResponse;
 import restapi.kculturebackend.domain.auth.dto.SignupRequest;
 import restapi.kculturebackend.domain.auth.dto.SignupResponse;
+import restapi.kculturebackend.domain.auth.entity.RefreshToken;
 import restapi.kculturebackend.domain.auth.repository.RefreshTokenRepository;
 import restapi.kculturebackend.domain.auth.service.AuthService;
 import restapi.kculturebackend.domain.user.entity.User;
@@ -217,6 +220,67 @@ class AuthServiceTest {
 
         // then
         verify(refreshTokenRepository).deleteById(userId);
+    }
+
+    @Test
+    @DisplayName("토큰 갱신 성공")
+    void refreshToken_Success() {
+        // given
+        String oldRefreshToken = "oldRefreshToken";
+        RefreshToken storedToken = RefreshToken.of(
+                testUser.getId().toString(),
+                testUser.getEmail(),
+                oldRefreshToken,
+                604800L
+        );
+
+        when(jwtTokenProvider.validateToken(oldRefreshToken)).thenReturn(true);
+        when(refreshTokenRepository.findByToken(oldRefreshToken)).thenReturn(Optional.of(storedToken));
+        when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
+        when(jwtTokenProvider.createAccessToken(anyString(), any())).thenReturn("newAccessToken");
+        when(jwtTokenProvider.createRefreshToken(anyString())).thenReturn("newRefreshToken");
+        doNothing().when(refreshTokenRepository).deleteByToken(oldRefreshToken);
+        when(refreshTokenRepository.save(any())).thenReturn(null);
+
+        // when
+        AuthTokens tokens = authService.refreshToken(oldRefreshToken);
+
+        // then
+        assertThat(tokens).isNotNull();
+        assertThat(tokens.getAccessToken()).isEqualTo("newAccessToken");
+        assertThat(tokens.getRefreshToken()).isEqualTo("newRefreshToken");
+        
+        verify(refreshTokenRepository).deleteByToken(oldRefreshToken);
+        verify(refreshTokenRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("토큰 갱신 실패 - 유효하지 않은 토큰")
+    void refreshToken_Fail_InvalidToken() {
+        // given
+        String invalidToken = "invalidToken";
+        when(jwtTokenProvider.validateToken(invalidToken)).thenReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> authService.refreshToken(invalidToken))
+                .isInstanceOf(UnauthorizedException.class);
+        
+        verify(refreshTokenRepository, never()).findByToken(anyString());
+    }
+
+    @Test
+    @DisplayName("토큰 갱신 실패 - 저장된 토큰 없음")
+    void refreshToken_Fail_TokenNotFound() {
+        // given
+        String refreshToken = "notFoundToken";
+        when(jwtTokenProvider.validateToken(refreshToken)).thenReturn(true);
+        when(refreshTokenRepository.findByToken(refreshToken)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> authService.refreshToken(refreshToken))
+                .isInstanceOf(UnauthorizedException.class);
+        
+        verify(userRepository, never()).findByEmail(anyString());
     }
 }
 

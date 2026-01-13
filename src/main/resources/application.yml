@@ -80,11 +80,16 @@ spring:
             enable: true
             required: true
 
-# JWT ??
+# JWT 설정
 jwt:
   secret: ${JWT_SECRET:your-secret-key-min-256-bits-long-for-hs256-algorithm-security}
-  access-token-expiration: 3600000 # 1?? (???)
-  refresh-token-expiration: 604800000 # 7? (???)
+  access-token-expiration: 3600000 # 1시간 (밀리초)
+  refresh-token-expiration: 604800000 # 7일 (밀리초)
+
+# 앱 설정
+app:
+  cookie:
+    secure: ${COOKIE_SECURE:false} # 운영환경에서는 true (HTTPS)
 
 # 파일 저장소 설정
 file:

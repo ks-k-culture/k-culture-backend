@@ -22,7 +22,6 @@ import restapi.kculturebackend.domain.auth.dto.AuthTokens;
 import restapi.kculturebackend.domain.auth.dto.ForgotPasswordRequest;
 import restapi.kculturebackend.domain.auth.dto.LoginRequest;
 import restapi.kculturebackend.domain.auth.dto.LoginResponse;
-import restapi.kculturebackend.domain.auth.dto.RefreshTokenRequest;
 import restapi.kculturebackend.domain.auth.dto.ResetPasswordRequest;
 import restapi.kculturebackend.domain.auth.dto.SignupRequest;
 import restapi.kculturebackend.domain.auth.dto.SignupResponse;
@@ -149,12 +148,10 @@ public class AuthService {
     }
 
     /**
-     * 토큰 갱신
+     * 토큰 갱신 (쿠키에서 refreshToken을 직접 받음)
      */
     @Transactional
-    public AuthTokens refreshToken(RefreshTokenRequest request) {
-        String refreshToken = request.getRefreshToken();
-
+    public AuthTokens refreshToken(String refreshToken) {
         // Refresh Token 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {
             throw new UnauthorizedException(ErrorCode.INVALID_REFRESH_TOKEN);
