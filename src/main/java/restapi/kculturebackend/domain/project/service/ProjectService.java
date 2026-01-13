@@ -41,7 +41,9 @@ public class ProjectService {
      */
     @Transactional(readOnly = true)
     public Page<ProjectResponse> getProjects(String name, ProjectType type, ProjectStatus status, Pageable pageable) {
-        return projectRepository.search(name, type, status, pageable)
+        String typeStr = type != null ? type.name() : null;
+        String statusStr = status != null ? status.name() : null;
+        return projectRepository.search(name, typeStr, statusStr, pageable)
                 .map(ProjectResponse::from);
     }
 

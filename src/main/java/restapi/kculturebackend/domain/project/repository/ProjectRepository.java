@@ -1,18 +1,17 @@
 package restapi.kculturebackend.domain.project.repository;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import restapi.kculturebackend.domain.project.entity.Project;
-import restapi.kculturebackend.domain.project.entity.ProjectStatus;
-import restapi.kculturebackend.domain.project.entity.ProjectType;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import restapi.kculturebackend.domain.project.entity.Project;
 
 /**
  * 프로젝트 리포지토리
@@ -47,13 +46,19 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
     /**
      * 프로젝트 검색 (이름, 유형, 상태 필터)
      */
-    @Query("SELECT p FROM Project p WHERE " +
-           "(:name IS NULL OR LOWER(p.projectName) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
-           "(:type IS NULL OR p.projectType = :type) AND " +
-           "(:status IS NULL OR p.status = :status)")
+    @Query(value = "SELECT * FROM projects p WHERE " +
+           "(:name IS NULL OR p.project_name ILIKE CONCAT('%', :name, '%')) AND " +
+           "(:type IS NULL OR p.project_type = :type) AND " +
+           "(:status IS NULL OR p.status = :status) " +
+           "ORDER BY p.created_at DESC",
+           countQuery = "SELECT COUNT(*) FROM projects p WHERE " +
+           "(:name IS NULL OR p.project_name ILIKE CONCAT('%', :name, '%')) AND " +
+           "(:type IS NULL OR p.project_type = :type) AND " +
+           "(:status IS NULL OR p.status = :status)",
+           nativeQuery = true)
     Page<Project> search(@Param("name") String name,
-                         @Param("type") ProjectType type,
-                         @Param("status") ProjectStatus status,
+                         @Param("type") String type,
+                         @Param("status") String status,
                          Pageable pageable);
 
     /**

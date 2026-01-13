@@ -1,10 +1,8 @@
 package restapi.kculturebackend.domain.project.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -12,7 +10,21 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import restapi.kculturebackend.common.dto.ApiResponse;
 import restapi.kculturebackend.common.dto.PaginationResponse;
 import restapi.kculturebackend.domain.project.dto.CreateProjectRequest;
@@ -22,9 +34,6 @@ import restapi.kculturebackend.domain.project.entity.ProjectStatus;
 import restapi.kculturebackend.domain.project.entity.ProjectType;
 import restapi.kculturebackend.domain.project.service.ProjectService;
 import restapi.kculturebackend.domain.user.entity.User;
-
-import java.util.List;
-import java.util.UUID;
 
 /**
  * 프로젝트 API 컨트롤러
@@ -46,7 +55,7 @@ public class ProjectController {
             @Parameter(description = "프로젝트명 검색") @RequestParam(required = false) String name,
             @Parameter(description = "프로젝트 유형") @RequestParam(required = false) ProjectType type,
             @Parameter(description = "프로젝트 상태") @RequestParam(required = false) ProjectStatus status,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 20) Pageable pageable) {
 
         Page<ProjectResponse> projects = projectService.getProjects(name, type, status, pageable);
         return ResponseEntity.ok(ApiResponse.success(PaginationResponse.from(projects)));
