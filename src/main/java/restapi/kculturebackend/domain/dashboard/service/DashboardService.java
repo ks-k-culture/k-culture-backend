@@ -1,9 +1,11 @@
 package restapi.kculturebackend.domain.dashboard.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import restapi.kculturebackend.domain.actor.repository.ActorProfileRepository;
 import restapi.kculturebackend.domain.dashboard.dto.ActorDashboardStats;
 import restapi.kculturebackend.domain.dashboard.dto.AgencyDashboardStats;
@@ -13,8 +15,6 @@ import restapi.kculturebackend.domain.project.repository.CharacterRepository;
 import restapi.kculturebackend.domain.project.repository.ProjectRepository;
 import restapi.kculturebackend.domain.user.entity.User;
 import restapi.kculturebackend.domain.user.entity.UserType;
-
-import org.springframework.data.domain.PageRequest;
 
 /**
  * 대시보드 서비스
@@ -32,15 +32,15 @@ public class DashboardService {
     // 배우 대시보드 통계 조회
     @Transactional(readOnly = true)
     public ActorDashboardStats getActorStats(User user) {
-        // 실제 데이터 조회 로직 (현재는 더미 데이터)
-        // TODO: 조회수 트래킹 테이블 생성 후 구현
-
         int profileCompleteness = calculateProfileCompleteness(user);
 
+        // 찜 받은 수 (내 프로필이 다른 사람에게 찜된 수)
+        long likes = favoriteRepository.countByTargetIdAndType(user.getId(), FavoriteType.ACTOR);
+
         return ActorDashboardStats.builder()
-                .profileViews(0) // TODO: 실제 조회수 집계
-                .likes(0) // TODO: 찜 받은 수 집계
-                .contactRequests(0) // TODO: 섭외 요청 수 집계
+                .profileViews(0) // TODO: 조회수 트래킹 테이블 생성 후 구현
+                .likes((int) likes)
+                .contactRequests(0) // TODO: Contact 테이블 생성 후 구현
                 .profileCompleteness(profileCompleteness)
                 .build();
     }

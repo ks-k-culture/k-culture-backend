@@ -145,14 +145,21 @@ public class ActorService {
             user.updateProfile(request.getName(), user.getProfileImage());
         }
 
-        // 나이대에서 출생년도 추정
-        Integer birthYear = estimateBirthYear(request.getAgeGroup());
+        // birthYear가 직접 전달되면 사용, 아니면 나이대에서 추정
+        Integer birthYear = request.getBirthYear() != null 
+                ? request.getBirthYear() 
+                : estimateBirthYear(request.getAgeGroup());
 
         actor.updateProfile(
                 request.getName(),
                 birthYear,
                 request.getIntroduction(),
-                null, null, null, null, null, null
+                null, // nationality
+                request.getHeight(),
+                request.getWeight(),
+                request.getSkills(),
+                null, // languages
+                null  // agency
         );
 
         ActorProfile saved = actorProfileRepository.save(actor);

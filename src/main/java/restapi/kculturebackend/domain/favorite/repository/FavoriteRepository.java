@@ -32,4 +32,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, UUID> {
     // 사용자의 특정 찜 조회
     @Query("SELECT f FROM Favorite f WHERE f.id = :favoriteId AND f.user.id = :userId")
     Optional<Favorite> findByIdAndUserId(@Param("favoriteId") UUID favoriteId, @Param("userId") UUID userId);
+
+    // 특정 대상이 찜 받은 수 조회
+    long countByTargetIdAndType(UUID targetId, FavoriteType type);
 }

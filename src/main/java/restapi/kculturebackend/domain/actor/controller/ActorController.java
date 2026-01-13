@@ -149,6 +149,10 @@ public class ActorController {
             @Parameter(description = "활동명") @RequestParam("name") String name,
             @Parameter(description = "한 줄 소개") @RequestParam("introduction") String introduction,
             @Parameter(description = "나이대") @RequestParam("ageGroup") String ageGroup,
+            @Parameter(description = "출생년도") @RequestParam(value = "birthYear", required = false) Integer birthYear,
+            @Parameter(description = "특기 목록") @RequestParam(value = "skills", required = false) List<String> skills,
+            @Parameter(description = "키 (cm)") @RequestParam(value = "height", required = false) Integer height,
+            @Parameter(description = "몸무게 (kg)") @RequestParam(value = "weight", required = false) Integer weight,
             @Parameter(description = "프로필 이미지") @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 
         String profileImageUrl = null;
@@ -161,6 +165,10 @@ public class ActorController {
                 .name(name)
                 .introduction(introduction)
                 .ageGroup(ageGroup)
+                .birthYear(birthYear)
+                .skills(skills)
+                .height(height)
+                .weight(weight)
                 .build();
 
         ActorDetailResponse profile = actorService.createProfile(user, request, profileImageUrl);

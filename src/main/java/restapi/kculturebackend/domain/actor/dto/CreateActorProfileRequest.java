@@ -1,5 +1,7 @@
 package restapi.kculturebackend.domain.actor.dto;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -26,4 +28,12 @@ public class CreateActorProfileRequest {
 
     @NotBlank(message = "나이대는 필수입니다.")
     private String ageGroup;
+
+    private Integer birthYear;
+
+    private List<String> skills;
+
+    private Integer height;
+
+    private Integer weight;
 }
