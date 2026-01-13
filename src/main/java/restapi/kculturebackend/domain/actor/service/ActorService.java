@@ -26,6 +26,7 @@ import restapi.kculturebackend.domain.actor.entity.ActorProfile;
 import restapi.kculturebackend.domain.actor.repository.ActorProfileRepository;
 import restapi.kculturebackend.domain.user.entity.User;
 import restapi.kculturebackend.domain.user.entity.UserType;
+import restapi.kculturebackend.domain.user.repository.UserRepository;
 
 /**
  * 배우 서비스
@@ -36,6 +37,7 @@ import restapi.kculturebackend.domain.user.entity.UserType;
 public class ActorService {
 
     private final ActorProfileRepository actorProfileRepository;
+    private final UserRepository userRepository;
 
     /**
      * 배우 목록 조회 (프로필 완성된 배우만)
@@ -111,6 +113,21 @@ public class ActorService {
         log.info("Actor profile updated: {}", user.getId());
         
         return ActorDetailResponse.from(savedActor);
+    }
+
+    // 프로필 이미지 업데이트
+    @Transactional
+    public void updateProfileImage(User user, String imageUrl) {
+        validateActorUser(user);
+        
+        // User 엔티티를 다시 조회하여 영속성 컨텍스트에 포함시킴
+        User managedUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        
+        managedUser.updateProfileImage(imageUrl);
+        userRepository.save(managedUser);
+        
+        log.info("Profile image updated for user: {}", user.getId());
     }
 
     // 배우 프로필 등록

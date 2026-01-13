@@ -1,15 +1,28 @@
 package restapi.kculturebackend.domain.user.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import restapi.kculturebackend.common.entity.BaseEntity;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import restapi.kculturebackend.common.entity.BaseEntity;
 
 /**
  * 사용자 엔티티 (배우/에이전시 공통)
@@ -83,6 +96,10 @@ public class User extends BaseEntity implements UserDetails {
     // 비즈니스 메서드
     public void updateProfile(String name, String profileImage) {
         this.name = name;
+        this.profileImage = profileImage;
+    }
+
+    public void updateProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
 

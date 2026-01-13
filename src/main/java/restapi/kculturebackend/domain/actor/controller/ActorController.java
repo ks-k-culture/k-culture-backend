@@ -12,7 +12,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +30,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import restapi.kculturebackend.common.dto.ApiResponse;
 import restapi.kculturebackend.common.dto.PaginationResponse;
-import restapi.kculturebackend.domain.actor.dto.*;
+import restapi.kculturebackend.domain.actor.dto.ActorDetailResponse;
+import restapi.kculturebackend.domain.actor.dto.ActorRecommendRequest;
+import restapi.kculturebackend.domain.actor.dto.ActorRecommendResponse;
+import restapi.kculturebackend.domain.actor.dto.ActorSummaryResponse;
+import restapi.kculturebackend.domain.actor.dto.ContactActorRequest;
+import restapi.kculturebackend.domain.actor.dto.CreateActorProfileRequest;
+import restapi.kculturebackend.domain.actor.dto.UpdateActorProfileRequest;
 import restapi.kculturebackend.domain.actor.service.ActorService;
 import restapi.kculturebackend.domain.user.entity.User;
 import restapi.kculturebackend.infrastructure.storage.FileStorageService;
@@ -101,6 +115,28 @@ public class ActorController {
         
         ActorDetailResponse profile = actorService.updateProfile(user, request);
         return ResponseEntity.ok(ApiResponse.success(profile));
+    }
+
+    /**
+     * 프로필 이미지 업로드
+     */
+    @Operation(summary = "프로필 이미지 업로드", description = "배우 프로필 이미지를 업로드합니다.")
+    @PutMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<Map<String, String>>> uploadProfileImage(
+            @AuthenticationPrincipal User user,
+            @RequestPart("image") MultipartFile image) {
+        
+        if (image == null || image.isEmpty()) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("이미지 파일이 필요합니다.", "IMAGE_REQUIRED"));
+        }
+        
+        UploadResult uploadResult = fileStorageService.upload(image, FileType.PROFILE_IMAGE);
+        String imageUrl = uploadResult.getUrl();
+        
+        // 프로필 이미지 URL 업데이트
+        actorService.updateProfileImage(user, imageUrl);
+        
+        return ResponseEntity.ok(ApiResponse.success(Map.of("imageUrl", imageUrl)));
     }
 
     /**
