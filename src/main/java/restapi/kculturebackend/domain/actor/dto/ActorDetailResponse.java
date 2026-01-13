@@ -1,12 +1,13 @@
 package restapi.kculturebackend.domain.actor.dto;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import lombok.Builder;
 import lombok.Getter;
 import restapi.kculturebackend.domain.actor.entity.ActorProfile;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * 배우 상세 조회 응답 DTO
@@ -32,6 +33,9 @@ public class ActorDetailResponse {
     private LocalDateTime updatedAt;
 
     public static ActorDetailResponse from(ActorProfile actor) {
+        List<String> skillsCopy = actor.getSkills() != null ? new ArrayList<>(actor.getSkills()) : new ArrayList<>();
+        List<String> languagesCopy = actor.getLanguages() != null ? new ArrayList<>(actor.getLanguages()) : new ArrayList<>();
+
         return ActorDetailResponse.builder()
                 .id(actor.getUserId())
                 .email(actor.getUser().getEmail())
@@ -43,8 +47,8 @@ public class ActorDetailResponse {
                 .nationality(actor.getNationality())
                 .height(actor.getHeight())
                 .weight(actor.getWeight())
-                .skills(actor.getSkills())
-                .languages(actor.getLanguages())
+                .skills(skillsCopy)
+                .languages(languagesCopy)
                 .agency(actor.getAgency())
                 .isProfileComplete(actor.getIsProfileComplete())
                 .createdAt(actor.getCreatedAt())

@@ -1,24 +1,31 @@
 package restapi.kculturebackend.domain.actor.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import restapi.kculturebackend.common.exception.ErrorCode;
 import restapi.kculturebackend.common.exception.ForbiddenException;
 import restapi.kculturebackend.common.exception.NotFoundException;
-import restapi.kculturebackend.domain.actor.dto.*;
+import restapi.kculturebackend.domain.actor.dto.ActorDetailResponse;
+import restapi.kculturebackend.domain.actor.dto.ActorRecommendRequest;
+import restapi.kculturebackend.domain.actor.dto.ActorRecommendResponse;
+import restapi.kculturebackend.domain.actor.dto.ActorSummaryResponse;
+import restapi.kculturebackend.domain.actor.dto.ContactActorRequest;
+import restapi.kculturebackend.domain.actor.dto.CreateActorProfileRequest;
+import restapi.kculturebackend.domain.actor.dto.UpdateActorProfileRequest;
 import restapi.kculturebackend.domain.actor.entity.ActorProfile;
 import restapi.kculturebackend.domain.actor.repository.ActorProfileRepository;
 import restapi.kculturebackend.domain.user.entity.User;
 import restapi.kculturebackend.domain.user.entity.UserType;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * 배우 서비스
@@ -56,6 +63,10 @@ public class ActorService {
         ActorProfile actor = actorProfileRepository.findByUserIdWithUser(actorId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ACTOR_PROFILE_NOT_FOUND));
         
+        // Lazy 컬렉션 초기화 (트랜잭션 내에서 수행)
+        actor.getSkills().size();
+        actor.getLanguages().size();
+        
         return ActorDetailResponse.from(actor);
     }
 
@@ -69,12 +80,14 @@ public class ActorService {
         ActorProfile actor = actorProfileRepository.findByUserIdWithUser(user.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ACTOR_PROFILE_NOT_FOUND));
         
+        // Lazy 컬렉션 초기화 (트랜잭션 내에서 수행)
+        actor.getSkills().size();
+        actor.getLanguages().size();
+        
         return ActorDetailResponse.from(actor);
     }
 
-    /**
-     * 배우 프로필 수정
-     */
+    // 배우 프로필 수정
     @Transactional
     public ActorDetailResponse updateProfile(User user, UpdateActorProfileRequest request) {
         validateActorUser(user);
@@ -100,9 +113,7 @@ public class ActorService {
         return ActorDetailResponse.from(savedActor);
     }
 
-    /**
-     * 배우 프로필 등록
-     */
+    // 배우 프로필 등록
     @Transactional
     public ActorDetailResponse createProfile(User user, CreateActorProfileRequest request, String profileImageUrl) {
         validateActorUser(user);
@@ -133,9 +144,7 @@ public class ActorService {
         return ActorDetailResponse.from(saved);
     }
 
-    /**
-     * AI 배우 추천 (현재는 간단한 필터링으로 구현, 추후 AI 서비스 연동)
-     */
+    // AI 배우 추천 (현재는 간단한 필터링으로 구현, 추후 AI 서비스 연동)
     @Transactional(readOnly = true)
     public List<ActorRecommendResponse> recommendActors(User user, ActorRecommendRequest request) {
         validateAgencyUser(user);
@@ -160,9 +169,7 @@ public class ActorService {
         return recommendations;
     }
 
-    /**
-     * 배우 연락하기
-     */
+    // 배우 연락하기
     @Transactional
     public UUID contactActor(User user, UUID actorId, ContactActorRequest request) {
         validateAgencyUser(user);
@@ -180,9 +187,7 @@ public class ActorService {
         return contactId;
     }
 
-    /**
-     * 나이대 문자열에서 출생년도 추정
-     */
+    // 나이대 문자열에서 출생년도 추정
     private Integer estimateBirthYear(String ageGroup) {
         int currentYear = java.time.Year.now().getValue();
         return switch (ageGroup) {
@@ -196,18 +201,14 @@ public class ActorService {
         };
     }
 
-    /**
-     * 사용자가 배우 타입인지 검증
-     */
+    // 사용자가 배우 타입인지 검증
     private void validateActorUser(User user) {
         if (user.getType() != UserType.ACTOR) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN, "배우 계정만 접근할 수 있습니다.");
         }
     }
 
-    /**
-     * 사용자가 에이전시 타입인지 검증
-     */
+    // 사용자가 에이전시 타입인지 검증
     private void validateAgencyUser(User user) {
         if (user.getType() != UserType.AGENCY) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN, "에이전시 계정만 접근할 수 있습니다.");
