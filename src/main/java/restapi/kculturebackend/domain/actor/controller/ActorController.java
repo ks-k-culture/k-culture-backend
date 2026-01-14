@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import restapi.kculturebackend.common.dto.ApiResponse;
@@ -86,10 +87,28 @@ public class ActorController {
     @Operation(summary = "배우 상세 조회", description = "특정 배우의 상세 정보를 조회합니다.")
     @GetMapping("/{actorId}")
     public ResponseEntity<ApiResponse<ActorDetailResponse>> getActorDetail(
-            @Parameter(description = "배우 ID") @PathVariable UUID actorId) {
+            @Parameter(description = "배우 ID") @PathVariable UUID actorId,
+            @AuthenticationPrincipal User currentUser,
+            HttpServletRequest request) {
         
-        ActorDetailResponse actor = actorService.getActorDetail(actorId);
+        String clientIp = getClientIp(request);
+        ActorDetailResponse actor = actorService.getActorDetailWithViewRecord(actorId, currentUser, clientIp);
         return ResponseEntity.ok(ApiResponse.success(actor));
+    }
+
+    /**
+     * 클라이언트 IP 추출
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty()) {
+            return xRealIp;
+        }
+        return request.getRemoteAddr();
     }
 
     /**

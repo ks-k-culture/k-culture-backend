@@ -1,5 +1,7 @@
 package restapi.kculturebackend.domain.dashboard.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,4 +19,5 @@ public class ActorDashboardStats {
     private Integer likes;
     private Integer contactRequests;
     private Integer profileCompleteness;
+    private List<ActivityResponse> recentActivities;
 }

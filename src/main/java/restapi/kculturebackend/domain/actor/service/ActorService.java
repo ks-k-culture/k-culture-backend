@@ -24,6 +24,12 @@ import restapi.kculturebackend.domain.actor.dto.CreateActorProfileRequest;
 import restapi.kculturebackend.domain.actor.dto.UpdateActorProfileRequest;
 import restapi.kculturebackend.domain.actor.entity.ActorProfile;
 import restapi.kculturebackend.domain.actor.repository.ActorProfileRepository;
+import restapi.kculturebackend.domain.dashboard.entity.Activity;
+import restapi.kculturebackend.domain.dashboard.entity.ContactRequest;
+import restapi.kculturebackend.domain.dashboard.entity.ContactRequestStatus;
+import restapi.kculturebackend.domain.dashboard.repository.ActivityRepository;
+import restapi.kculturebackend.domain.dashboard.repository.ContactRequestRepository;
+import restapi.kculturebackend.domain.dashboard.service.DashboardService;
 import restapi.kculturebackend.domain.user.entity.User;
 import restapi.kculturebackend.domain.user.entity.UserType;
 import restapi.kculturebackend.domain.user.repository.UserRepository;
@@ -38,6 +44,9 @@ public class ActorService {
 
     private final ActorProfileRepository actorProfileRepository;
     private final UserRepository userRepository;
+    private final DashboardService dashboardService;
+    private final ContactRequestRepository contactRequestRepository;
+    private final ActivityRepository activityRepository;
 
     /**
      * 배우 목록 조회 (프로필 완성된 배우만)
@@ -68,6 +77,24 @@ public class ActorService {
         // Lazy 컬렉션 초기화 (트랜잭션 내에서 수행)
         actor.getSkills().size();
         actor.getLanguages().size();
+        
+        return ActorDetailResponse.from(actor);
+    }
+
+    /**
+     * 배우 상세 조회 (조회수 기록 포함)
+     */
+    @Transactional
+    public ActorDetailResponse getActorDetailWithViewRecord(UUID actorId, User viewer, String viewerIp) {
+        ActorProfile actor = actorProfileRepository.findByUserIdWithUser(actorId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ACTOR_PROFILE_NOT_FOUND));
+        
+        // Lazy 컬렉션 초기화 (트랜잭션 내에서 수행)
+        actor.getSkills().size();
+        actor.getLanguages().size();
+        
+        // 조회수 기록 (비동기로 처리하지 않고 동기적으로 처리)
+        dashboardService.recordProfileView(actorId, viewer, viewerIp);
         
         return ActorDetailResponse.from(actor);
     }
@@ -193,22 +220,50 @@ public class ActorService {
         return recommendations;
     }
 
-    // 배우 연락하기
+    /**
+     * 배우 연락하기 (섭외 요청)
+     */
     @Transactional
     public UUID contactActor(User user, UUID actorId, ContactActorRequest request) {
         validateAgencyUser(user);
 
         // 배우 존재 확인
-        if (!actorProfileRepository.existsById(actorId)) {
-            throw new NotFoundException(ErrorCode.ACTOR_PROFILE_NOT_FOUND);
+        User actor = userRepository.findById(actorId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ACTOR_PROFILE_NOT_FOUND));
+
+        if (actor.getType() != UserType.ACTOR) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN, "배우에게만 섭외 요청을 보낼 수 있습니다.");
         }
 
-        // TODO: 실제로는 Contact 엔티티를 생성하고 알림을 보내야 함
-        // 현재는 UUID만 생성하여 반환
-        UUID contactId = UUID.randomUUID();
+        // 중복 섭외 요청 확인 (대기중인 요청이 있는지)
+        boolean hasPendingRequest = contactRequestRepository.existsByAgencyIdAndActorIdAndProjectIdAndStatusIn(
+                user.getId(),
+                actorId,
+                request.getProjectId(),
+                List.of(ContactRequestStatus.PENDING)
+        );
+
+        if (hasPendingRequest) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN, "이미 대기 중인 섭외 요청이 있습니다.");
+        }
+
+        // 섭외 요청 생성
+        ContactRequest contactRequest = ContactRequest.create(
+                user,
+                actor,
+                request.getProjectId(),
+                request.getCharacterId(),
+                request.getMessage()
+        );
+        ContactRequest savedRequest = contactRequestRepository.save(contactRequest);
+
+        // 활동 내역 기록 (배우에게)
+        Activity activity = Activity.contactReceived(actor, user, request.getProjectId());
+        activityRepository.save(activity);
+
         log.info("Contact request sent from agency {} to actor {}", user.getId(), actorId);
 
-        return contactId;
+        return savedRequest.getId();
     }
 
     // 나이대 문자열에서 출생년도 추정
@@ -239,4 +294,3 @@ public class ActorService {
         }
     }
 }
-

@@ -1,16 +1,20 @@
 package restapi.kculturebackend.domain.dashboard.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import restapi.kculturebackend.common.dto.ApiResponse;
 import restapi.kculturebackend.domain.dashboard.dto.ActorDashboardStats;
 import restapi.kculturebackend.domain.dashboard.dto.AgencyDashboardStats;
+import restapi.kculturebackend.domain.dashboard.dto.RecentActivitiesResponse;
 import restapi.kculturebackend.domain.dashboard.service.DashboardService;
 import restapi.kculturebackend.domain.user.entity.User;
 
@@ -25,7 +29,9 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    // 대시보드 통계 조회
+    /**
+     * 대시보드 통계 조회
+     */
     @Operation(summary = "대시보드 통계 조회", description = "사용자 유형에 따른 대시보드 통계 정보를 조회합니다.")
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<?>> getDashboardStats(@AuthenticationPrincipal User user) {
@@ -36,5 +42,18 @@ public class DashboardController {
             AgencyDashboardStats stats = dashboardService.getAgencyStats(user);
             return ResponseEntity.ok(ApiResponse.success(stats));
         }
+    }
+
+    /**
+     * 최근 활동 내역 조회
+     */
+    @Operation(summary = "최근 활동 내역 조회", description = "사용자의 최근 활동 내역을 조회합니다.")
+    @GetMapping("/activities")
+    public ResponseEntity<ApiResponse<RecentActivitiesResponse>> getRecentActivities(
+            @AuthenticationPrincipal User user,
+            @Parameter(description = "조회할 활동 수 (기본값: 10, 최대: 50)")
+            @RequestParam(defaultValue = "10") int limit) {
+        RecentActivitiesResponse response = dashboardService.getRecentActivities(user, limit);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

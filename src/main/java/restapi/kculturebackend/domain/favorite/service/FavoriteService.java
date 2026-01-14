@@ -14,6 +14,7 @@ import restapi.kculturebackend.common.exception.ErrorCode;
 import restapi.kculturebackend.common.exception.NotFoundException;
 import restapi.kculturebackend.domain.actor.dto.ActorSummaryResponse;
 import restapi.kculturebackend.domain.actor.repository.ActorProfileRepository;
+import restapi.kculturebackend.domain.dashboard.service.DashboardService;
 import restapi.kculturebackend.domain.favorite.dto.CreateFavoriteRequest;
 import restapi.kculturebackend.domain.favorite.dto.FavoriteResponse;
 import restapi.kculturebackend.domain.favorite.entity.Favorite;
@@ -31,6 +32,7 @@ public class FavoriteService {
 
     private final FavoriteRepository favoriteRepository;
     private final ActorProfileRepository actorProfileRepository;
+    private final DashboardService dashboardService;
 
     // 찜 목록 조회
     @Transactional(readOnly = true)
@@ -66,6 +68,11 @@ public class FavoriteService {
 
         Favorite favorite = Favorite.create(user, request.getTargetId(), request.getType());
         Favorite saved = favoriteRepository.save(favorite);
+
+        // 배우 프로필 찜인 경우 활동 내역 기록
+        if (request.getType() == FavoriteType.ACTOR) {
+            dashboardService.recordFavoriteActivity(request.getTargetId(), user);
+        }
 
         log.info("Favorite added: user={}, target={}, type={}", user.getId(), request.getTargetId(), request.getType());
 
