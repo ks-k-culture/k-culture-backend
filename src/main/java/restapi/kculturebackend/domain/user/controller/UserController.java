@@ -1,12 +1,19 @@
 package restapi.kculturebackend.domain.user.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import restapi.kculturebackend.common.dto.ApiResponse;
+import restapi.kculturebackend.domain.user.dto.ChangePasswordRequest;
 import restapi.kculturebackend.domain.user.dto.NotificationSettingsDto;
 import restapi.kculturebackend.domain.user.dto.UpdateProfileRequest;
 import restapi.kculturebackend.domain.user.dto.UserProfileResponse;
@@ -68,6 +75,18 @@ public class UserController {
             @RequestBody NotificationSettingsDto request) {
         NotificationSettingsDto response = userService.updateNotificationSettings(user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    /**
+     * 비밀번호 변경
+     */
+    @Operation(summary = "비밀번호 변경")
+    @PutMapping("/password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        userService.changePassword(user.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }
 

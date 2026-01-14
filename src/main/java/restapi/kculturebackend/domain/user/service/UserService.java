@@ -1,11 +1,17 @@
 package restapi.kculturebackend.domain.user.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import restapi.kculturebackend.common.exception.BusinessException;
 import restapi.kculturebackend.common.exception.ErrorCode;
 import restapi.kculturebackend.common.exception.NotFoundException;
+import restapi.kculturebackend.domain.user.dto.ChangePasswordRequest;
 import restapi.kculturebackend.domain.user.dto.NotificationSettingsDto;
 import restapi.kculturebackend.domain.user.dto.UpdateProfileRequest;
 import restapi.kculturebackend.domain.user.dto.UserProfileResponse;
@@ -14,8 +20,6 @@ import restapi.kculturebackend.domain.user.entity.User;
 import restapi.kculturebackend.domain.user.entity.UserProfile;
 import restapi.kculturebackend.domain.user.repository.UserProfileRepository;
 import restapi.kculturebackend.domain.user.repository.UserRepository;
-
-import java.util.UUID;
 
 /**
  * 사용자 프로필 서비스
@@ -27,6 +31,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 내 정보 조회
@@ -123,6 +128,35 @@ public class UserService {
         log.info("Notification settings updated for user: {}", userId);
 
         return NotificationSettingsDto.from(settings);
+    }
+
+    /**
+     * 비밀번호 변경
+     */
+    @Transactional
+    public void changePassword(UUID userId, ChangePasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new BusinessException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        // 새 비밀번호와 확인 비밀번호 일치 확인
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new BusinessException(ErrorCode.PASSWORD_MISMATCH);
+        }
+
+        // 새 비밀번호가 현재 비밀번호와 같은지 확인
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new BusinessException(ErrorCode.SAME_PASSWORD);
+        }
+
+        // 비밀번호 변경
+        user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        log.info("Password changed for user: {}", userId);
     }
 }
 

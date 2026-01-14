@@ -34,6 +34,8 @@ public enum ErrorCode {
     PASSWORD_MISMATCH("USER_003", "비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     TERMS_NOT_AGREED("USER_004", "필수 약관에 동의해야 합니다.", HttpStatus.BAD_REQUEST),
     USER_PROFILE_NOT_FOUND("USER_005", "사용자 프로필을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    INVALID_PASSWORD("USER_006", "현재 비밀번호가 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+    SAME_PASSWORD("USER_007", "새 비밀번호가 현재 비밀번호와 동일합니다.", HttpStatus.BAD_REQUEST),
 
     // ===== 배우 관련 (ACTOR_xxx) =====
     ACTOR_NOT_FOUND("ACTOR_001", "배우를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
