@@ -29,10 +29,16 @@ public class ActorDetailResponse {
     private List<String> languages;
     private String agency;
     private Boolean isProfileComplete;
+    private Long viewCount;
+    private Long likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public static ActorDetailResponse from(ActorProfile actor) {
+        return from(actor, 0L, 0L);
+    }
+
+    public static ActorDetailResponse from(ActorProfile actor, Long viewCount, Long likeCount) {
         List<String> skillsCopy = actor.getSkills() != null ? new ArrayList<>(actor.getSkills()) : new ArrayList<>();
         List<String> languagesCopy = actor.getLanguages() != null ? new ArrayList<>(actor.getLanguages()) : new ArrayList<>();
 
@@ -51,6 +57,8 @@ public class ActorDetailResponse {
                 .languages(languagesCopy)
                 .agency(actor.getAgency())
                 .isProfileComplete(actor.getIsProfileComplete())
+                .viewCount(viewCount)
+                .likeCount(likeCount)
                 .createdAt(actor.getCreatedAt())
                 .updatedAt(actor.getUpdatedAt())
                 .build();

@@ -29,7 +29,10 @@ import restapi.kculturebackend.domain.dashboard.entity.ContactRequest;
 import restapi.kculturebackend.domain.dashboard.entity.ContactRequestStatus;
 import restapi.kculturebackend.domain.dashboard.repository.ActivityRepository;
 import restapi.kculturebackend.domain.dashboard.repository.ContactRequestRepository;
+import restapi.kculturebackend.domain.dashboard.repository.ProfileViewRepository;
 import restapi.kculturebackend.domain.dashboard.service.DashboardService;
+import restapi.kculturebackend.domain.favorite.entity.FavoriteType;
+import restapi.kculturebackend.domain.favorite.repository.FavoriteRepository;
 import restapi.kculturebackend.domain.user.entity.User;
 import restapi.kculturebackend.domain.user.entity.UserType;
 import restapi.kculturebackend.domain.user.repository.UserRepository;
@@ -47,6 +50,8 @@ public class ActorService {
     private final DashboardService dashboardService;
     private final ContactRequestRepository contactRequestRepository;
     private final ActivityRepository activityRepository;
+    private final ProfileViewRepository profileViewRepository;
+    private final FavoriteRepository favoriteRepository;
 
     /**
      * 배우 목록 조회 (프로필 완성된 배우만)
@@ -96,7 +101,11 @@ public class ActorService {
         // 조회수 기록 (비동기로 처리하지 않고 동기적으로 처리)
         dashboardService.recordProfileView(actorId, viewer, viewerIp);
         
-        return ActorDetailResponse.from(actor);
+        // 조회수 및 좋아요 수 조회
+        long viewCount = profileViewRepository.countByActorId(actorId);
+        long likeCount = favoriteRepository.countByTargetIdAndType(actorId, FavoriteType.ACTOR);
+        
+        return ActorDetailResponse.from(actor, viewCount, likeCount);
     }
 
     /**
