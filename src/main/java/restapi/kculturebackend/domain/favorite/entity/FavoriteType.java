@@ -1,5 +1,8 @@
 package restapi.kculturebackend.domain.favorite.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -14,4 +17,19 @@ public enum FavoriteType {
 
     private final String code;
     private final String displayName;
+
+    @JsonValue
+    public String getCode() {
+        return code;
+    }
+
+    @JsonCreator
+    public static FavoriteType fromCode(String code) {
+        for (FavoriteType type : values()) {
+            if (type.code.equalsIgnoreCase(code)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Unknown FavoriteType code: " + code);
+    }
 }
