@@ -1,5 +1,8 @@
 package restapi.kculturebackend.domain.actor.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -20,5 +23,24 @@ public enum FilmographyType {
     OTHER("기타");
 
     private final String displayName;
+
+    @JsonValue
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @JsonCreator
+    public static FilmographyType fromDisplayName(String displayName) {
+        for (FilmographyType type : values()) {
+            if (type.displayName.equals(displayName)) {
+                return type;
+            }
+        }
+        try {
+            return FilmographyType.valueOf(displayName.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return OTHER;
+        }
+    }
 }
 
