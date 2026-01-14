@@ -48,6 +48,11 @@ spring:
 
   # Redis ??
   data:
+    # 1-based page 사용
+    web:
+      pageable:
+        one-indexed-parameters: true
+    # Redis 설정
     redis:
       host: localhost
       port: 6380
