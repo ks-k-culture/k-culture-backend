@@ -18,6 +18,7 @@ import restapi.kculturebackend.common.exception.NotFoundException;
 import restapi.kculturebackend.domain.actor.dto.ActorDetailResponse;
 import restapi.kculturebackend.domain.actor.dto.ActorRecommendRequest;
 import restapi.kculturebackend.domain.actor.dto.ActorRecommendResponse;
+import restapi.kculturebackend.domain.actor.dto.ActorSearchRequest;
 import restapi.kculturebackend.domain.actor.dto.ActorSummaryResponse;
 import restapi.kculturebackend.domain.actor.dto.ContactActorRequest;
 import restapi.kculturebackend.domain.actor.dto.CreateActorProfileRequest;
@@ -63,7 +64,16 @@ public class ActorService {
     }
 
     /**
-     * 배우 검색
+     * 배우 고급 검색 (필터/정렬/페이징)
+     */
+    @Transactional(readOnly = true)
+    public Page<ActorSummaryResponse> searchActorsAdvanced(ActorSearchRequest request, Pageable pageable) {
+        return actorProfileRepository.searchWithFilters(request, pageable)
+                .map(ActorSummaryResponse::from);
+    }
+
+    /**
+     * 배우 검색 (이름 검색 - 하위 호환)
      */
     @Transactional(readOnly = true)
     public Page<ActorSummaryResponse> searchActors(String name, Pageable pageable) {

@@ -34,6 +34,7 @@ import restapi.kculturebackend.common.dto.PaginationResponse;
 import restapi.kculturebackend.domain.actor.dto.ActorDetailResponse;
 import restapi.kculturebackend.domain.actor.dto.ActorRecommendRequest;
 import restapi.kculturebackend.domain.actor.dto.ActorRecommendResponse;
+import restapi.kculturebackend.domain.actor.dto.ActorSearchRequest;
 import restapi.kculturebackend.domain.actor.dto.ActorSummaryResponse;
 import restapi.kculturebackend.domain.actor.dto.ContactActorRequest;
 import restapi.kculturebackend.domain.actor.dto.CreateActorProfileRequest;
@@ -57,19 +58,46 @@ public class ActorController {
     private final FileStorageService fileStorageService;
 
     /**
-     * 배우 목록 조회
+     * 배우 목록 조회 (고급 검색 지원)
+     * 필터/정렬/페이징을 지원하는 통합 검색 API
      */
-    @Operation(summary = "배우 목록 조회", description = "프로필이 완성된 배우 목록을 페이징하여 조회합니다.")
+    @Operation(summary = "배우 목록 조회", description = "필터/정렬 조건으로 배우 목록을 검색합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<PaginationResponse<ActorSummaryResponse>>> getActors(
+            @Parameter(description = "구분 (배우/모델)") @RequestParam(required = false) String category,
+            @Parameter(description = "성별 (남자/여자)") @RequestParam(required = false) String gender,
+            @Parameter(description = "최소 나이") @RequestParam(required = false) Integer ageMin,
+            @Parameter(description = "최대 나이") @RequestParam(required = false) Integer ageMax,
+            @Parameter(description = "최소 키 (cm)") @RequestParam(required = false) Integer heightMin,
+            @Parameter(description = "최대 키 (cm)") @RequestParam(required = false) Integer heightMax,
+            @Parameter(description = "최소 몸무게 (kg)") @RequestParam(required = false) Integer weightMin,
+            @Parameter(description = "최대 몸무게 (kg)") @RequestParam(required = false) Integer weightMax,
+            @Parameter(description = "특기/스킬 목록") @RequestParam(required = false) List<String> skills,
+            @Parameter(description = "키워드 검색 (이름, 활동명)") @RequestParam(required = false) String keyword,
+            @Parameter(description = "정렬 기준 (recent, views_high, views_low, name, age_young, age_old, height_tall, height_short)") 
+                @RequestParam(required = false, defaultValue = "recent") String sortBy,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         
-        Page<ActorSummaryResponse> actors = actorService.getActors(pageable);
+        ActorSearchRequest searchRequest = ActorSearchRequest.builder()
+                .category(category)
+                .gender(gender)
+                .ageMin(ageMin)
+                .ageMax(ageMax)
+                .heightMin(heightMin)
+                .heightMax(heightMax)
+                .weightMin(weightMin)
+                .weightMax(weightMax)
+                .skills(skills)
+                .keyword(keyword)
+                .sortBy(sortBy)
+                .build();
+        
+        Page<ActorSummaryResponse> actors = actorService.searchActorsAdvanced(searchRequest, pageable);
         return ResponseEntity.ok(ApiResponse.success(PaginationResponse.from(actors)));
     }
 
     /**
-     * 배우 검색
+     * 배우 검색 (하위 호환용)
      */
     @Operation(summary = "배우 검색", description = "이름/활동명으로 배우를 검색합니다.")
     @GetMapping("/search")

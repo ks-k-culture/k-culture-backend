@@ -14,10 +14,13 @@ import restapi.kculturebackend.domain.actor.entity.ActorProfile;
 /**
  * 배우 프로필 레포지토리
  */
-public interface ActorProfileRepository extends JpaRepository<ActorProfile, UUID> {
+public interface ActorProfileRepository extends JpaRepository<ActorProfile, UUID>, ActorProfileRepositoryCustom {
 
     // 프로필 완성된 배우만 조회
     Page<ActorProfile> findByIsProfileCompleteTrue(Pageable pageable);
+
+    // 프로필 완성된 배우 수 카운트
+    long countByIsProfileCompleteTrue();
 
     // 활동명으로 검색
     @Query("SELECT a FROM ActorProfile a WHERE " +
