@@ -1,5 +1,8 @@
 package restapi.kculturebackend.domain.job.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -17,4 +20,19 @@ public enum JobCategory {
     OTHER("기타");
 
     private final String displayName;
+
+    @JsonValue
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @JsonCreator
+    public static JobCategory fromDisplayName(String displayName) {
+        for (JobCategory category : values()) {
+            if (category.displayName.equals(displayName)) {
+                return category;
+            }
+        }
+        throw new IllegalArgumentException("Unknown category: " + displayName);
+    }
 }

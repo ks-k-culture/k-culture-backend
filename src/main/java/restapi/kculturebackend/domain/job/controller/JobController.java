@@ -26,9 +26,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import restapi.kculturebackend.common.dto.ApiResponse;
-import restapi.kculturebackend.common.dto.PaginationResponse;
 import restapi.kculturebackend.domain.job.dto.CreateJobRequest;
 import restapi.kculturebackend.domain.job.dto.JobDetailResponse;
+import restapi.kculturebackend.domain.job.dto.JobListResponse;
 import restapi.kculturebackend.domain.job.dto.JobSummaryResponse;
 import restapi.kculturebackend.domain.job.dto.UpdateJobRequest;
 import restapi.kculturebackend.domain.job.entity.JobCategory;
@@ -49,7 +49,7 @@ public class JobController {
     // 작품구인 목록 조회
     @Operation(summary = "작품구인 목록 조회", description = "필터 조건으로 작품구인 목록을 검색합니다.")
     @GetMapping
-    public ResponseEntity<ApiResponse<PaginationResponse<JobSummaryResponse>>> getJobs(
+    public ResponseEntity<ApiResponse<JobListResponse>> getJobs(
             @Parameter(description = "카테고리") @RequestParam(required = false) JobCategory category,
             @Parameter(description = "성별") @RequestParam(required = false) String gender,
             @Parameter(description = "나이대") @RequestParam(required = false) String ageRange,
@@ -59,7 +59,7 @@ public class JobController {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<JobSummaryResponse> jobs = jobService.getJobs(category, gender, ageRange, isPumasi, status, search, pageable);
-        return ResponseEntity.ok(ApiResponse.success(PaginationResponse.from(jobs)));
+        return ResponseEntity.ok(ApiResponse.success(JobListResponse.from(jobs)));
     }
 
     // 작품구인 상세 조회
