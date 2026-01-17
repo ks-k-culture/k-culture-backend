@@ -1,26 +1,32 @@
 package restapi.kculturebackend.domain.notice.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import restapi.kculturebackend.common.dto.ApiResponse;
 import restapi.kculturebackend.common.dto.PaginationResponse;
 import restapi.kculturebackend.domain.notice.dto.NoticeDetailResponse;
 import restapi.kculturebackend.domain.notice.dto.NoticeSummaryResponse;
 import restapi.kculturebackend.domain.notice.entity.NoticeType;
 import restapi.kculturebackend.domain.notice.service.NoticeService;
-import restapi.kculturebackend.security.CustomUserDetails;
-
-import java.util.List;
-import java.util.UUID;
+import restapi.kculturebackend.domain.user.entity.User;
 
 /**
  * 공지사항 API 컨트롤러
@@ -59,9 +65,9 @@ public class NoticeController {
     @PostMapping("/{noticeId}/read")
     public ResponseEntity<ApiResponse<Void>> markAsRead(
             @Parameter(description = "공지사항 ID") @PathVariable UUID noticeId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal User user) {
 
-        noticeService.markAsRead(noticeId, userDetails.getUserId());
+        noticeService.markAsRead(noticeId, user.getId());
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
@@ -69,9 +75,9 @@ public class NoticeController {
     @Operation(summary = "읽은 공지사항 목록 조회", description = "현재 사용자가 읽은 공지사항 ID 목록을 조회합니다.")
     @GetMapping("/read")
     public ResponseEntity<ApiResponse<List<UUID>>> getReadNoticeIds(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal User user) {
 
-        List<UUID> readNoticeIds = noticeService.getReadNoticeIds(userDetails.getUserId());
+        List<UUID> readNoticeIds = noticeService.getReadNoticeIds(user.getId());
         return ResponseEntity.ok(ApiResponse.success(readNoticeIds));
     }
 }
