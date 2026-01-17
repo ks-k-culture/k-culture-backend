@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import restapi.kculturebackend.common.dto.ApiResponse;
 import restapi.kculturebackend.common.dto.PaginationResponse;
@@ -16,7 +17,9 @@ import restapi.kculturebackend.domain.notice.dto.NoticeDetailResponse;
 import restapi.kculturebackend.domain.notice.dto.NoticeSummaryResponse;
 import restapi.kculturebackend.domain.notice.entity.NoticeType;
 import restapi.kculturebackend.domain.notice.service.NoticeService;
+import restapi.kculturebackend.security.CustomUserDetails;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -49,5 +52,26 @@ public class NoticeController {
 
         NoticeDetailResponse notice = noticeService.getNotice(noticeId);
         return ResponseEntity.ok(ApiResponse.success(notice));
+    }
+
+    // 공지사항 읽음 표시
+    @Operation(summary = "공지사항 읽음 표시", description = "공지사항을 읽음 처리합니다.")
+    @PostMapping("/{noticeId}/read")
+    public ResponseEntity<ApiResponse<Void>> markAsRead(
+            @Parameter(description = "공지사항 ID") @PathVariable UUID noticeId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        noticeService.markAsRead(noticeId, userDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 사용자가 읽은 공지사항 ID 목록 조회
+    @Operation(summary = "읽은 공지사항 목록 조회", description = "현재 사용자가 읽은 공지사항 ID 목록을 조회합니다.")
+    @GetMapping("/read")
+    public ResponseEntity<ApiResponse<List<UUID>>> getReadNoticeIds(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        List<UUID> readNoticeIds = noticeService.getReadNoticeIds(userDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(readNoticeIds));
     }
 }
