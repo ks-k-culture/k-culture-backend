@@ -12,8 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import restapi.kculturebackend.common.exception.ErrorCode;
 import restapi.kculturebackend.common.exception.NotFoundException;
+import restapi.kculturebackend.domain.notice.dto.CreateNoticeRequest;
 import restapi.kculturebackend.domain.notice.dto.NoticeDetailResponse;
 import restapi.kculturebackend.domain.notice.dto.NoticeSummaryResponse;
+import restapi.kculturebackend.domain.notice.dto.UpdateNoticeRequest;
 import restapi.kculturebackend.domain.notice.entity.Notice;
 import restapi.kculturebackend.domain.notice.entity.NoticeRead;
 import restapi.kculturebackend.domain.notice.entity.NoticeType;
@@ -96,5 +98,44 @@ public class NoticeService {
         }
 
         return noticeReadRepository.existsByUserAndNotice(user, notice);
+    }
+
+    // ===== Admin 전용 메서드 =====
+
+    // 공지사항 생성
+    @Transactional
+    public NoticeDetailResponse createNotice(CreateNoticeRequest request) {
+        Notice notice = Notice.builder()
+                .type(request.getType())
+                .title(request.getTitle())
+                .content(request.getContent())
+                .build();
+
+        Notice saved = noticeRepository.save(notice);
+        log.info("공지사항 생성: id={}, title={}", saved.getId(), saved.getTitle());
+
+        return NoticeDetailResponse.from(saved);
+    }
+
+    // 공지사항 수정
+    @Transactional
+    public NoticeDetailResponse updateNotice(UUID noticeId, UpdateNoticeRequest request) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOTICE_NOT_FOUND));
+
+        notice.update(request.getType(), request.getTitle(), request.getContent());
+        log.info("공지사항 수정: id={}, title={}", notice.getId(), notice.getTitle());
+
+        return NoticeDetailResponse.from(notice);
+    }
+
+    // 공지사항 삭제
+    @Transactional
+    public void deleteNotice(UUID noticeId) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOTICE_NOT_FOUND));
+
+        noticeRepository.delete(notice);
+        log.info("공지사항 삭제: id={}", noticeId);
     }
 }

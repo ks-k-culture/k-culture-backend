@@ -8,7 +8,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum UserType {
     ACTOR("actor", "배우"),
-    AGENCY("agency", "에이전시");
+    AGENCY("agency", "에이전시"),
+    ADMIN("admin", "관리자");
 
     private final String value;
     private final String description;

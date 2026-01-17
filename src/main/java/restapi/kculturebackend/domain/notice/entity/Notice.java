@@ -1,10 +1,22 @@
 package restapi.kculturebackend.domain.notice.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import restapi.kculturebackend.common.entity.BaseEntity;
-
 import java.util.UUID;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import restapi.kculturebackend.common.entity.BaseEntity;
 
 /**
  * 공지사항 엔티티
@@ -42,5 +54,12 @@ public class Notice extends BaseEntity {
     // 조회수 증가
     public void incrementViews() {
         this.views++;
+    }
+
+    // 공지사항 수정
+    public void update(NoticeType type, String title, String content) {
+        this.type = type;
+        this.title = title;
+        this.content = content;
     }
 }
